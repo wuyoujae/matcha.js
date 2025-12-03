@@ -3,219 +3,270 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Matcha V5 - 完整演示</title>
+    <title>Matcha V6 - 完整演示</title>
     <link rel="stylesheet" href="matcha.css" />
   </head>
   <body>
     <div id="matcha-stage"></div>
 
     <script id="matcha-source" type="text/markdown">
-      <!-- theme: matcha -->
-      <!-- transition: fade -->
       <!-- layout: center -->
+      <!-- transition: fade -->
 
-      # 🍵 Matcha V5
+      # 🍵 Matcha V6
 
       ### 轻量 · 模块化 · 超越 Reveal.js
 
-      *按方向键或点击继续 →*
+      <!-- step: fade -->
+
+      *点击或按 → 继续*
+
+      <!-- step: slide-up -->
+
+      **支持分步展示，就像 PowerPoint！**
 
       ---
 
       <!-- layout: center -->
-
-      ## 为什么选择 Matcha？
-
-      | 特性 | Reveal.js | Matcha |
-      |------|-----------|--------|
-      | 核心体积 | ~400KB | <15KB |
-      | 布局系统 | 仅居中 | **4种布局** |
-      | 模块化 | 插件模式 | **完全模块化** |
-      | 过渡动画 | 内置固定 | **8种可配置** |
-
-      ---
-
       <!-- transition: slide -->
-      <!-- layout: doc -->
+      <!-- theme: ocean -->
 
-      ## 📦 模块化架构
+      ## 🌊 每页独立主题
 
-      Matcha 的每个功能都是独立模块：
+      这一页使用 **Ocean** 主题
 
-      - **markdowmParse.js** - Markdown 解析（支持表格！）
-      - **progressBar.js** - 进度条控制
-      - **style.js** - 主题与样式
-      - **layout.js** - 布局系统
-      - **transition.js** - 过渡动画 ✨ *新增*
+      <!-- step -->
 
-      > 开发者可以轻松替换或扩展任何模块！
+      主题在切换页面时会跟随变化
+
+      <!-- step: zoom -->
+
+      `<!-- theme: ocean -->`
 
       ---
 
+      <!-- layout: center -->
       <!-- transition: zoom -->
-      <!-- layout: center -->
+      <!-- theme: sakura -->
 
-      # 🎬 过渡动画演示
+      ## 🌸 Sakura 主题
 
-      `<!-- transition: zoom -->`
+      这一页使用 **Sakura** 主题
 
-      这一页使用 **缩放** 效果进入
+      <!-- step: slide-up -->
+
+      每一页都可以有不同的：
+      
+      <!-- step -->
+      
+      - 主题 🎨
+      
+      <!-- step -->
+      
+      - 过渡动画 🎬
+      
+      <!-- step -->
+      
+      - 布局方式 📐
 
       ---
 
+      <!-- layout: center -->
       <!-- transition: flip -->
-      <!-- layout: center -->
+      <!-- theme: sunset -->
 
-      ## 🔄 翻转效果
+      ## 🌅 分步展示演示
 
-      `<!-- transition: flip -->`
+      <!-- step: fade -->
 
-      3D 翻转过渡，酷炫！
+      ### 第一步：淡入
+
+      <!-- step: slide-up -->
+
+      ### 第二步：从下滑入
+
+      <!-- step: slide-left -->
+
+      ### 第三步：从右滑入
+
+      <!-- step: zoom -->
+
+      ### 第四步：缩放出现
+
+      <!-- step: bounce -->
+
+      ### 第五步：弹跳！
 
       ---
 
-      <!-- transition: cube -->
-      <!-- layout: center -->
-
-      ## 🎲 立方体效果
-
-      `<!-- transition: cube -->`
-
-      像旋转立方体一样切换
-
-      ---
-
-      <!-- transition: slideUp -->
       <!-- layout: cols -->
+      <!-- transition: slide -->
+      <!-- theme: matcha -->
 
-      ## 📝 Markdown 全支持
+      ## 📝 分步语法
 
-      **粗体**、*斜体*、~~删除线~~
+      <!-- step -->
 
-      - 无序列表
-      - 自动包装 `<ul>`
-      - 美观的样式
+      简单的分步标记：
 
-      > 引用块也很漂亮
+      ```markdown
+      <!-- step -->
+      这段内容点击后显示
+
+      <!-- step: slide-up -->
+      带效果的分步
+
+      <!-- step: zoom, delay=200 -->
+      带延迟的分步
+      ```
 
       +++
 
-      ```javascript
-      // 代码高亮
-      class Matcha {
-        constructor() {
-          this.awesome = true;
-        }
+      ## 可用效果
 
-        start() {
-          console.log("🍵 Ready!");
-        }
-      }
-      ```
+      <!-- step: slide-up -->
+
+      | 效果 | 说明 |
+      |------|------|
+      | fade | 淡入 |
+      | slide-up | 从下滑入 |
+      | slide-down | 从上滑入 |
+      | slide-left | 从右滑入 |
+      | slide-right | 从左滑入 |
+      | zoom | 缩放 |
+      | bounce | 弹跳 |
 
       ---
 
-      <!-- transition: fade -->
+      <!-- layout: doc -->
+      <!-- transition: slideUp -->
+
+      ## 交互方式
+
+      <!-- step -->
+
+      **下一步**：
+      - 点击屏幕任意位置
+      - 按 → 或 ↓ 键
+      - 按空格或回车
+
+      <!-- step -->
+
+      **上一步**：
+      - 右键点击
+      - 按 ← 或 ↑ 键
+
+      <!-- step -->
+
+      **快捷跳转**：
+      - Home 键 → 第一页
+      - End 键 → 最后一页
+
+      <!-- step: bounce -->
+
+      > 💡 分步展示和页面切换无缝衔接，就像真正的 PPT！
+
+      ---
+
       <!-- layout: center -->
+      <!-- transition: cube -->
+      <!-- theme: mono -->
 
-      ## 🎨 表格支持
+      ## ⚪ 极简 Mono 主题
 
-      | 效果 | 语法 | 说明 |
-      |------|------|------|
-      | fade | `<!-- transition: fade -->` | 淡入淡出 |
-      | slide | `<!-- transition: slide -->` | 水平滑动 |
-      | slideUp | `<!-- transition: slideUp -->` | 垂直滑动 |
-      | zoom | `<!-- transition: zoom -->` | 缩放 |
-      | flip | `<!-- transition: flip -->` | 水平翻转 |
-      | flipY | `<!-- transition: flipY -->` | 垂直翻转 |
-      | cube | `<!-- transition: cube -->` | 立方体 |
+      <!-- step -->
+
+      黑白配色，专业简约
+
+      <!-- step: slide-up -->
+
+      每个主题都有配套的：
+
+      <!-- step -->
+
+      - 背景色
+      - 文字色
+      - 强调色
+      - 字体
 
       ---
 
-      <!-- transition: slide -->
       <!-- layout: cols -->
+      <!-- transition: fade -->
+      <!-- theme: ocean -->
 
-      ![Demo](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80)
+      ![Code](https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80)
 
       +++
 
       ## 📸 图文混排
 
-      图片自动适应容器，带有阴影和圆角效果。
+      <!-- step -->
 
-      横分布局让图片和文字完美搭配。
+      Matcha 支持灵活的布局
 
-      - 响应式图片
-      - 自动居中对齐
-      - 美观的视觉效果
+      <!-- step: slide-left -->
+
+      - 居中布局
+      - 横分布局 (cols)
+      - 纵分布局 (rows)
+      - 网格布局 (grid)
+      - 文档布局 (doc)
+
+      <!-- step: zoom -->
+
+      **每个布局都支持分步展示！**
 
       ---
 
-      <!-- theme: ocean -->
-      <!-- transition: zoom -->
       <!-- layout: center -->
-
-      ## 🌊 Ocean 主题
-
-      `<!-- theme: ocean -->`
-
-      深邃的海洋蓝绿色
-
-      ---
-
-      <!-- theme: sakura -->
       <!-- transition: flip -->
-      <!-- layout: center -->
-
-      ## 🌸 Sakura 主题
-
-      `<!-- theme: sakura -->`
-
-      温柔的樱花粉色调
-
-      ---
-
-      <!-- theme: sunset -->
-      <!-- transition: slideUp -->
-      <!-- layout: center -->
-
-      ## 🌅 Sunset 主题
-
-      `<!-- theme: sunset -->`
-
-      温暖的日落橙色调
-
-      ---
-
       <!-- theme: matcha -->
-      <!-- transition: fade -->
-      <!-- layout: center -->
 
       ## ⚡ 快速开始
+
+      <!-- step -->
 
       ```html
       <script type="module">
         import Matcha from "./matcha.js";
 
         new Matcha({
-          transition: { type: "slide", duration: 800 },
-          style: { theme: "ocean" }
+          style: { theme: "ocean" },
+          transition: { type: "slide" },
+          fragment: { duration: 400 }
         }).start();
       </script>
       ```
 
       ---
 
-      <!-- transition: cube -->
       <!-- layout: center -->
+      <!-- transition: zoom -->
 
       # 🙏 感谢使用
 
-      ### Matcha.js - 轻量优雅的演示框架
+      ### Matcha.js V6
 
-      [GitHub](https://github.com) · [文档](./grammar.md)
+      <!-- step: fade -->
 
-      *按 ← 键可以回看*
+      ✨ 每页独立主题
+
+      <!-- step: slide-up -->
+
+      🎬 每页独立动画
+
+      <!-- step: slide-left -->
+
+      👆 分步展示支持
+
+      <!-- step: bounce -->
+
+      **超越 Reveal.js 的轻量框架**
+
+      <!-- step: zoom -->
+
+      *右键可以回退哦~*
     </script>
 
     <script type="module">
@@ -233,6 +284,9 @@
         transition: {
           type: "fade",
           duration: 600,
+        },
+        fragment: {
+          duration: 400,
         },
       });
 

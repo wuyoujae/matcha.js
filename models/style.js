@@ -1,30 +1,24 @@
 /**
  * @module style
- * @description 主题样式模块，支持自定义颜色、字体和视觉效果
- * @version 1.0.0
+ * @description 主题样式模块，支持每页独立的主题和样式
+ * @version 2.0.0
  *
  * @syntax
- * 全局主题设置（在第一张幻灯片前）:
- *   <!-- theme: dark -->
- *   <!-- theme: light -->
- *   <!-- theme: custom -->
+ * 每页主题设置:
+ *   <!-- theme: ocean -->      // 这一页使用 ocean 主题
+ *   <!-- theme: sakura -->     // 这一页使用 sakura 主题
  *
  * 单页样式覆盖:
  *   <!-- style: bg=#1a1a1a, accent=#00ff88 -->
- *   <!-- style: bg=linear-gradient(135deg, #667eea 0%, #764ba2 100%) -->
  *
  * 预设主题:
- *   <!-- theme: matcha -->    // 默认抹茶绿
- *   <!-- theme: sakura -->    // 樱花粉
- *   <!-- theme: ocean -->     // 海洋蓝
- *   <!-- theme: sunset -->    // 日落橙
- *   <!-- theme: mono -->      // 黑白极简
+ *   matcha, sakura, ocean, sunset, mono, light
  */
 class Style {
   constructor(options = {}) {
     this.options = {
       // 默认主题
-      theme: "matcha",
+      defaultTheme: options.theme || "matcha",
       ...options,
     };
 
@@ -96,119 +90,84 @@ class Style {
    */
   init(matcha) {
     this.matcha = matcha;
-    this._createStyleElement();
-    this.setTheme(this.options.theme);
+    this._injectBaseStyles();
   }
 
   /**
-   * 创建样式元素
+   * 注入基础样式
    * @private
    */
-  _createStyleElement() {
+  _injectBaseStyles() {
     this.styleElement = document.createElement("style");
-    this.styleElement.id = "matcha-theme-vars";
-    document.head.appendChild(this.styleElement);
-  }
-
-  /**
-   * 设置主题
-   * @param {string} themeName - 主题名称
-   */
-  setTheme(themeName) {
-    const theme = this.themes[themeName];
-    if (!theme) {
-      console.warn(`[Matcha Style] 未找到主题: ${themeName}`);
-      return;
-    }
-    this._applyTheme(theme);
-    this.options.theme = themeName;
-  }
-
-  /**
-   * 应用主题变量
-   * @private
-   * @param {Object} theme - 主题配置对象
-   */
-  _applyTheme(theme) {
-    const css = `
-:root {
-  --matcha-bg: ${theme.bg};
-  --matcha-fg: ${theme.fg};
-  --matcha-accent: ${theme.accent};
-  --matcha-secondary: ${theme.secondary};
-  --glass-bg: ${theme.glassBg};
-  --border-color: ${theme.borderColor};
-  --font-main: ${theme.font};
+    this.styleElement.id = "matcha-style-module";
+    this.styleElement.textContent = `
+/* Matcha Style Module - Per-slide theming */
+.matcha-slide {
+  /* 每个 slide 可以有自己的 CSS 变量 */
+  background: var(--slide-bg, var(--matcha-bg));
+  color: var(--slide-fg, var(--matcha-fg));
 }
-body, html {
-  background: var(--matcha-bg);
-  color: var(--matcha-fg);
-  font-family: var(--font-main);
+
+.matcha-slide h2 {
+  color: var(--slide-accent, var(--matcha-accent));
+  border-left-color: var(--slide-accent, var(--matcha-accent));
+}
+
+.matcha-slide strong {
+  color: var(--slide-accent, var(--matcha-accent));
+}
+
+.matcha-slide blockquote {
+  background: var(--slide-glass-bg, var(--glass-bg));
+  border-left-color: var(--slide-secondary, var(--matcha-secondary));
+}
+
+.matcha-slide .matcha-table th {
+  color: var(--slide-accent, var(--matcha-accent));
+}
+
+.matcha-slide ul li::before {
+  color: var(--slide-accent, var(--matcha-accent));
 }
     `;
-    this.styleElement.textContent = css;
+    document.head.appendChild(this.styleElement);
+
+    // 设置默认主题到 :root
+    this._setGlobalTheme(this.options.defaultTheme);
   }
 
   /**
-   * 自定义单个 CSS 变量
-   * @param {string} name - 变量名（不含 --matcha- 前缀）
-   * @param {string} value - 变量值
+   * 设置全局默认主题
+   * @private
    */
-  setVar(name, value) {
-    document.documentElement.style.setProperty(`--matcha-${name}`, value);
+  _setGlobalTheme(themeName) {
+    const theme = this.themes[themeName];
+    if (!theme) return;
+
+    const root = document.documentElement;
+    root.style.setProperty("--matcha-bg", theme.bg);
+    root.style.setProperty("--matcha-fg", theme.fg);
+    root.style.setProperty("--matcha-accent", theme.accent);
+    root.style.setProperty("--matcha-secondary", theme.secondary);
+    root.style.setProperty("--glass-bg", theme.glassBg);
+    root.style.setProperty("--border-color", theme.borderColor);
+    root.style.setProperty("--font-main", theme.font);
   }
 
   /**
-   * 批量设置 CSS 变量
-   * @param {Object} vars - 变量对象 { name: value }
-   */
-  setVars(vars) {
-    Object.entries(vars).forEach(([name, value]) => {
-      this.setVar(name, value);
-    });
-  }
-
-  /**
-   * 注册自定义主题
-   * @param {string} name - 主题名称
-   * @param {Object} config - 主题配置
-   */
-  registerTheme(name, config) {
-    this.themes[name] = {
-      ...this.themes.matcha, // 继承默认主题作为 fallback
-      ...config,
-    };
-  }
-
-  /**
-   * 获取当前主题配置
-   * @returns {Object} 当前主题配置
-   */
-  getTheme() {
-    return this.themes[this.options.theme];
-  }
-
-  /**
-   * 获取所有可用主题名称
-   * @returns {string[]} 主题名称数组
-   */
-  getThemeNames() {
-    return Object.keys(this.themes);
-  }
-
-  /**
-   * 解析幻灯片中的样式指令
+   * 解析幻灯片中的样式指令（不再全局修改，而是返回配置）
    * @param {string} block - 幻灯片内容块
-   * @returns {Object} { cleanBlock, styles }
+   * @returns {Object} { cleanBlock, themeName, styles }
    */
   parseStyleDirective(block) {
     let cleanBlock = block;
+    let themeName = null;
     const styles = {};
 
     // 解析 <!-- theme: xxx -->
     const themeMatch = block.match(/<!--\s*theme:\s*([\w-]+)\s*-->/);
     if (themeMatch) {
-      this.setTheme(themeMatch[1]);
+      themeName = themeMatch[1];
       cleanBlock = cleanBlock.replace(themeMatch[0], "");
     }
 
@@ -225,24 +184,68 @@ body, html {
       cleanBlock = cleanBlock.replace(styleMatch[0], "");
     }
 
-    return { cleanBlock, styles };
+    return { cleanBlock, themeName, styles };
   }
 
   /**
-   * 应用单页样式
+   * 应用主题和样式到单个幻灯片（每页独立）
    * @param {HTMLElement} slideElement - 幻灯片 DOM 元素
-   * @param {Object} styles - 样式对象
+   * @param {string} themeName - 主题名称
+   * @param {Object} styles - 自定义样式对象
    */
-  applySlideStyle(slideElement, styles) {
+  applySlideTheme(slideElement, themeName, styles = {}) {
+    // 存储配置到 dataset
+    if (themeName) {
+      slideElement.dataset.theme = themeName;
+    }
+
+    // 应用主题的 CSS 变量到该 slide 元素
+    if (themeName && this.themes[themeName]) {
+      const theme = this.themes[themeName];
+      slideElement.style.setProperty("--slide-bg", theme.bg);
+      slideElement.style.setProperty("--slide-fg", theme.fg);
+      slideElement.style.setProperty("--slide-accent", theme.accent);
+      slideElement.style.setProperty("--slide-secondary", theme.secondary);
+      slideElement.style.setProperty("--slide-glass-bg", theme.glassBg);
+      slideElement.style.setProperty("--slide-border-color", theme.borderColor);
+      slideElement.style.fontFamily = theme.font;
+    }
+
+    // 应用自定义样式（覆盖主题）
     if (styles.bg) {
+      slideElement.style.setProperty("--slide-bg", styles.bg);
       slideElement.style.background = styles.bg;
     }
     if (styles.fg) {
+      slideElement.style.setProperty("--slide-fg", styles.fg);
       slideElement.style.color = styles.fg;
     }
     if (styles.accent) {
-      slideElement.style.setProperty("--matcha-accent", styles.accent);
+      slideElement.style.setProperty("--slide-accent", styles.accent);
     }
+    if (styles.secondary) {
+      slideElement.style.setProperty("--slide-secondary", styles.secondary);
+    }
+  }
+
+  /**
+   * 注册自定义主题
+   * @param {string} name - 主题名称
+   * @param {Object} config - 主题配置
+   */
+  registerTheme(name, config) {
+    this.themes[name] = {
+      ...this.themes.matcha,
+      ...config,
+    };
+  }
+
+  /**
+   * 获取所有可用主题名称
+   * @returns {string[]}
+   */
+  getThemeNames() {
+    return Object.keys(this.themes);
   }
 
   /**
@@ -260,35 +263,3 @@ body, html {
 // 导出方式
 export default Style;
 window.MatchaStyle = Style;
-
-/*
- * ============================================
- * 使用示例 (Demo)
- * ============================================
- *
- * // 1. 基础使用 - 设置预设主题
- * const matcha = new Matcha({
- *   style: { theme: "ocean" }
- * });
- *
- * // 2. 运行时切换主题
- * matcha.modules.style.setTheme("sakura");
- *
- * // 3. 自定义单个变量
- * matcha.modules.style.setVar("accent", "#ff6b6b");
- *
- * // 4. 注册自定义主题
- * matcha.modules.style.registerTheme("myTheme", {
- *   bg: "#1a1a2e",
- *   fg: "#eaeaea",
- *   accent: "#e94560",
- *   secondary: "#0f3460"
- * });
- *
- * // 5. Markdown 中使用
- * // <!-- theme: ocean -->
- * // # 标题
- * //
- * // <!-- style: bg=#2d1b4e, accent=#ff6b9d -->
- * // ## 这一页使用自定义背景
- */

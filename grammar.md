@@ -10,6 +10,7 @@
 - [布局模块 (layout)](#布局模块-layout)
 - [样式模块 (style)](#样式模块-style)
 - [过渡动画 (transition)](#过渡动画-transition)
+- [分步展示 (fragment)](#分步展示-fragment)
 - [Markdown 解析 (markdowmParse)](#markdown-解析-markdowmparse)
 - [进度条 (progressBar)](#进度条-progressbar)
 
@@ -257,6 +258,133 @@ matcha.modules.transition.registerTransition("myEffect", {
 
 ---
 
+## 分步展示 (fragment)
+
+> 文件：`models/fragment.js`
+
+像 PowerPoint 一样逐步显示内容，点击或按键触发下一步。
+
+### 基础语法
+
+```markdown
+<!-- step -->
+
+第一步显示的内容
+
+<!-- step -->
+
+第二步显示的内容
+
+<!-- step -->
+
+第三步显示的内容
+```
+
+### 带效果的分步
+
+| 效果        | 语法                         | 说明         |
+| ----------- | ---------------------------- | ------------ |
+| fade        | `<!-- step: fade -->`        | 淡入（默认） |
+| slide-up    | `<!-- step: slide-up -->`    | 从下滑入     |
+| slide-down  | `<!-- step: slide-down -->`  | 从上滑入     |
+| slide-left  | `<!-- step: slide-left -->`  | 从右滑入     |
+| slide-right | `<!-- step: slide-right -->` | 从左滑入     |
+| zoom        | `<!-- step: zoom -->`        | 缩放出现     |
+| zoom-in     | `<!-- step: zoom-in -->`     | 放大进入     |
+| bounce      | `<!-- step: bounce -->`      | 弹跳出现     |
+| flip        | `<!-- step: flip -->`        | 翻转出现     |
+
+```markdown
+<!-- step: slide-up -->
+
+从下方滑入的内容
+
+<!-- step: bounce -->
+
+弹跳出现的内容
+```
+
+### 带延迟的分步
+
+```markdown
+<!-- step: fade, delay=200 -->
+
+延迟 200ms 后显示
+```
+
+### 指定顺序
+
+```markdown
+<!-- step: fade, order=2 -->
+
+这个第二步显示
+
+<!-- step: fade, order=1 -->
+
+这个第一步显示（即使写在后面）
+```
+
+### 列表自动分步
+
+```markdown
+<!-- step-list -->
+
+- 第一项（点击显示）
+- 第二项（再点击显示）
+- 第三项（继续点击）
+<!-- /step-list -->
+```
+
+带效果的列表：
+
+```markdown
+<!-- step-list: slide-up -->
+
+- 从下滑入的项目 1
+- 从下滑入的项目 2
+<!-- /step-list -->
+```
+
+### 分组同时显示
+
+```markdown
+<!-- step-group -->
+
+这两段内容会同时出现
+
+因为它们在同一个 group 里
+
+<!-- /step-group -->
+```
+
+### 交互方式
+
+| 操作     | 触发方式                |
+| -------- | ----------------------- |
+| 下一步   | 点击、→、↓、空格、Enter |
+| 上一步   | 右键点击、←、↑          |
+| 第一页   | Home 键                 |
+| 最后一页 | End 键                  |
+
+### JavaScript 控制
+
+```javascript
+// 手动触发下一步
+matcha.next();
+
+// 手动回退
+matcha.prev();
+
+// 检查当前页是否有分步
+matcha.modules.fragment.hasSteps(0);
+
+// 获取分步状态
+matcha.modules.fragment.getStepState(0);
+// { current: 2, total: 5 }
+```
+
+---
+
 ## Markdown 解析 (markdowmParse)
 
 > 文件：`models/markdowmParse.js`
@@ -357,10 +485,14 @@ matcha.modules.progressBar.setPosition("top");
 
 当多个指令出现时，按以下顺序解析：
 
-1. `<!-- theme: xxx -->` - 全局主题（影响后续所有页面）
-2. `<!-- layout: xxx -->` - 页面布局
-3. `<!-- style: xxx -->` - 页面样式覆盖
-4. Markdown 内容
+1. `<!-- transition: xxx -->` - **每页独立**的过渡动画
+2. `<!-- theme: xxx -->` - **每页独立**的主题
+3. `<!-- style: xxx -->` - **每页独立**的样式覆盖
+4. `<!-- layout: xxx -->` - 页面布局
+5. `<!-- step -->` - 分步展示标记
+6. Markdown 内容
+
+> 💡 **V6 新特性**：主题和过渡动画现在是**每页独立**的，不会影响其他页面！
 
 ---
 

@@ -11,7 +11,6 @@ class Matcha {
     this.config = {
       containerId: config.containerId || "matcha-stage",
       scriptId: config.scriptId || "matcha-source",
-      // 模块配置
       progressBar: config.progressBar || {},
       markdowmParse: config.markdowmParse || {},
       style: config.style || {},
@@ -21,40 +20,21 @@ class Matcha {
     };
     this.slidesElements = [];
     this.currentSlideIndex = 0;
-
-    // 初始化模块
     this.modules = {};
     this._initModules();
   }
 
-  /**
-   * 初始化内置模块
-   * @private
-   */
   _initModules() {
-    // Markdown 解析器
     this.modules.markdowmParse = new MarkdowmParse(this.config.markdowmParse);
     this.modules.markdowmParse.init(this);
 
-    // 进度条
     this.modules.progressBar = new ProgressBar(this.config.progressBar);
-
-    // 样式模块
     this.modules.style = new Style(this.config.style);
-
-    // 布局模块
     this.modules.layout = new Layout(this.config.layout);
-
-    // 过渡动画模块
     this.modules.transition = new Transition(this.config.transition);
-
-    // 分步展示模块
     this.modules.fragment = new Fragment(this.config.fragment);
   }
 
-  /**
-   * 使用插件/模块
-   */
   use(module, options = {}) {
     if (typeof module === "function") {
       const instance = new module(options);
@@ -67,14 +47,10 @@ class Matcha {
     return this;
   }
 
-  /**
-   * 启动 Matcha
-   */
   start() {
     const scriptTag = document.getElementById(this.config.scriptId);
     if (!scriptTag) return this;
 
-    // 初始化需要 DOM 的模块
     this.modules.progressBar.init(this);
     this.modules.style.init(this);
     this.modules.layout.init(this);
@@ -89,14 +65,10 @@ class Matcha {
     return this;
   }
 
-  /**
-   * 解析并构建幻灯片
-   */
   parseAndBuild(markdown) {
     const stage = document.getElementById(this.config.containerId);
     stage.innerHTML = "";
 
-    // 切分幻灯片
     const slideBlocks = markdown.split(/^\s*---\s*$/gm);
     let slideIndex = 0;
 
@@ -118,30 +90,29 @@ class Matcha {
       const { cleanBlock, layoutType, layoutParams } =
         this.modules.layout.parseLayoutDirective(afterStyle);
 
-      // 4. 预处理分步标记（在 Markdown 渲染之前）
-      const preprocessedContent =
-        this.modules.fragment.preprocessMarkdown(cleanBlock);
-
-      // 5. 构建 DOM（使用自定义渲染函数处理分步）
+      // 4. 构建 DOM，使用 fragment 模块解析分步
+      const currentSlideIndex = slideIndex;
       const slideDiv = this.modules.layout.buildLayout(
-        preprocessedContent,
+        cleanBlock,
         layoutType,
         layoutParams,
         (text) => {
-          // 渲染 Markdown
-          const html = this.modules.markdowmParse.parse(text);
-          // 处理分步标记，转换为 step blocks
-          return this.modules.fragment.processHTML(html, slideIndex);
+          // 使用 fragment 模块解析并渲染（在 Markdown 渲染之前处理 step 标记）
+          return this.modules.fragment.parseAndRender(
+            text,
+            currentSlideIndex,
+            (content) => this.modules.markdowmParse.parse(content)
+          );
         }
       );
 
-      // 6. 应用每页独立的主题
+      // 5. 应用每页独立的主题
       this.modules.style.applySlideTheme(slideDiv, themeName, styles);
 
-      // 7. 应用每页独立的过渡配置
+      // 6. 应用每页独立的过渡配置
       this.modules.transition.applySlideTransition(slideDiv, transitionConfig);
 
-      // 8. 初始化该页的分步状态
+      // 7. 初始化该页的分步状态
       this.modules.fragment.initSlide(slideDiv, slideIndex);
 
       stage.appendChild(slideDiv);
@@ -150,23 +121,15 @@ class Matcha {
     });
   }
 
-  /**
-   * 渲染 Markdown 为 HTML
-   */
   renderMarkdown(text) {
     return this.modules.markdowmParse.parse(text);
   }
 
-  /**
-   * 跳转到指定幻灯片
-   */
   goto(index, direction = "forward") {
     if (index < 0 || index >= this.slidesElements.length) return;
 
-    const prevIndex = this.currentSlideIndex;
     this.currentSlideIndex = index;
 
-    // 更新所有幻灯片状态
     this.slidesElements.forEach((el, i) => {
       if (i === index) {
         this.modules.transition.updateSlideState(el, "active");
@@ -182,100 +145,72 @@ class Matcha {
       }
     });
 
-    // 分步状态处理
     if (direction === "forward") {
-      // 往前走：重置新页面的分步到第一步
       this.modules.fragment.resetSlide(index);
     } else {
-      // 往回走：显示所有分步内容
       this.modules.fragment.showAllSteps(index);
     }
 
-    // 更新进度条
     this.modules.progressBar.update(index, this.slidesElements.length);
   }
 
-  /**
-   * 下一步（先处理分步，再切换页面）
-   */
   next() {
     const currentIndex = this.currentSlideIndex;
 
-    // 检查是否有分步需要显示
     if (this.modules.fragment.hasNextStep(currentIndex)) {
       this.modules.fragment.nextStep(currentIndex);
       return;
     }
 
-    // 没有更多分步，切换到下一页
     if (currentIndex < this.slidesElements.length - 1) {
       this.goto(currentIndex + 1, "forward");
     }
   }
 
-  /**
-   * 上一步（先回退分步，再切换页面）
-   */
   prev() {
     const currentIndex = this.currentSlideIndex;
 
-    // 检查是否有分步可以回退
     if (this.modules.fragment.hasPrevStep(currentIndex)) {
       this.modules.fragment.prevStep(currentIndex);
       return;
     }
 
-    // 没有更多分步可回退，切换到上一页
     if (currentIndex > 0) {
       this.goto(currentIndex - 1, "backward");
     }
   }
 
-  /**
-   * 绑定事件
-   */
   bindEvents() {
-    // 键盘事件
     document.addEventListener("keydown", (e) => {
-      // 右/下/空格/Enter = 下一步
       if (["ArrowRight", "ArrowDown", " ", "Enter"].includes(e.key)) {
         e.preventDefault();
         this.next();
       }
-      // 左/上 = 上一步
       if (["ArrowLeft", "ArrowUp"].includes(e.key)) {
         e.preventDefault();
         this.prev();
       }
-      // Home = 第一页
       if (e.key === "Home") {
         e.preventDefault();
         this.goto(0, "forward");
       }
-      // End = 最后一页
       if (e.key === "End") {
         e.preventDefault();
         this.goto(this.slidesElements.length - 1, "forward");
       }
     });
 
-    // 点击事件 = 下一步
     document.addEventListener("click", (e) => {
-      // 排除链接和按钮点击
       if (e.target.closest("a, button, input, textarea")) return;
       this.next();
     });
 
-    // 右键 = 上一步
     document.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       this.prev();
     });
   }
 
-  /**
-   * 销毁
-   */
   destroy() {
     Object.values(this.modules).forEach((module) => {
       if (module.destroy) module.destroy();
@@ -285,6 +220,5 @@ class Matcha {
   }
 }
 
-// 导出
 export default Matcha;
 window.Matcha = Matcha;

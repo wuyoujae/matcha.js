@@ -21,7 +21,7 @@
 
       <!-- step: slide-up -->
 
-      *点击或按 → 继续*
+      _点击或按 → 继续_
 
       ---
 
@@ -34,15 +34,15 @@
 
       <!-- step: fade -->
 
-      这是第二步，点击后出现（淡入效果）
+      第二步，点击后淡入显示
 
       <!-- step: slide-up -->
 
-      这是第三步，继续点击后出现（从下滑入）
+      第三步，从下方滑入
 
       <!-- step: zoom -->
 
-      第四步！缩放出现 ✨
+      第四步，缩放出现 ✨
 
       ---
 
@@ -52,15 +52,15 @@
 
       ## 🌊 每页独立主题
 
-      这一页用 **Ocean** 主题
+      这一页使用 **Ocean** 主题
 
       <!-- step: fade -->
 
-      切换页面时，主题也会跟着变化
+      主题和动画都是每页独立的
 
       <!-- step: slide-left -->
 
-      `<!-- theme: ocean -->`
+      语法：`<!-- theme: ocean -->`
 
       ---
 
@@ -72,19 +72,11 @@
 
       <!-- step: fade -->
 
-      每页可以设置不同的：
+      温柔的樱花粉色调
 
       <!-- step: slide-up -->
 
-      🎨 主题
-
-      <!-- step: slide-up -->
-
-      🎬 过渡动画
-
-      <!-- step: slide-up -->
-
-      📐 布局方式
+      每页可以设置不同的主题和动画
 
       ---
 
@@ -94,13 +86,11 @@
 
       ## 分步语法
 
-      使用 `<!-- step -->` 分隔内容
+      使用 `<!-- step -->` 分隔
 
       <!-- step: fade -->
 
       ```markdown
-      # 标题
-
       第一步内容
 
       <!-- step: fade -->
@@ -109,7 +99,7 @@
 
       <!-- step: slide-up -->
 
-      第三步内容（从下滑入）
+      第三步内容（滑入）
       ```
 
       +++
@@ -118,15 +108,14 @@
 
       <!-- step: fade -->
 
-      | 效果 | 说明 |
-      |------|------|
-      | fade | 淡入 |
-      | slide-up | 从下滑入 |
+      | 效果       | 说明     |
+      | ---------- | -------- |
+      | fade       | 淡入     |
+      | slide-up   | 从下滑入 |
       | slide-down | 从上滑入 |
       | slide-left | 从右滑入 |
-      | slide-right | 从左滑入 |
-      | zoom | 缩放 |
-      | bounce | 弹跳 |
+      | zoom       | 缩放     |
+      | bounce     | 弹跳     |
 
       ---
 
@@ -135,26 +124,19 @@
 
       ## 交互方式
 
-      **下一步**：
+      **下一步**：点击、→、↓、空格、Enter
 
       <!-- step: fade -->
 
-      - 点击屏幕任意位置
-      - 按 → 或 ↓ 键
-      - 按空格或回车
+      **上一步**：右键点击、←、↑
 
       <!-- step: fade -->
 
-      **上一步**：
-
-      <!-- step: fade -->
-
-      - 右键点击
-      - 按 ← 或 ↑ 键
+      **快捷跳转**：Home / End
 
       <!-- step: bounce -->
 
-      > 💡 分步内容是**累加显示**的，就像 PowerPoint！
+      > 💡 分步内容**累加显示**，就像 PowerPoint！
 
       ---
 
@@ -162,23 +144,15 @@
       <!-- transition: cube -->
       <!-- theme: sunset -->
 
-      ## 🌅 内容累加原理
+      ## 🌅 Sunset 主题
 
       <!-- step: fade -->
 
-      第1步：显示 "你好"
-
-      <!-- step: slide-up -->
-
-      第2步：显示 "你好" + "欢迎来到 Matcha!"
-
-      <!-- step: slide-left -->
-
-      第3步：继续累加更多内容...
+      温暖的日落橙色调
 
       <!-- step: zoom -->
 
-      就像真正的 PPT 动画！
+      **每个主题都是每页独立的**
 
       ---
 
@@ -194,7 +168,7 @@
 
       <!-- step: fade -->
 
-      支持灵活的布局
+      支持多种布局
 
       <!-- step: slide-left -->
 
@@ -210,29 +184,8 @@
       ---
 
       <!-- layout: center -->
-      <!-- transition: flip -->
-      <!-- theme: matcha -->
-
-      ## ⚡ 快速开始
-
-      <!-- step: fade -->
-
-      ```html
-      <script type="module">
-        import Matcha from "./matcha.js";
-
-        new Matcha({
-          style: { theme: "ocean" },
-          transition: { type: "slide" },
-          fragment: { duration: 400 }
-        }).start();
-      </script>
-      ```
-
-      ---
-
-      <!-- layout: center -->
       <!-- transition: zoom -->
+      <!-- theme: matcha -->
 
       # 🙏 感谢使用
 
@@ -242,15 +195,11 @@
 
       <!-- step: slide-up -->
 
-      ✨ 每页独立主题 · 🎬 独立动画 · 👆 分步展示
+      ✨ 每页独立主题 · 🎬 流畅动画 · 👆 分步展示
 
       <!-- step: bounce -->
 
       **超越 Reveal.js 的轻量框架**
-
-      <!-- step: zoom -->
-
-      *右键可以回退哦~*
     </script>
 
     <script type="module">
@@ -267,16 +216,14 @@
         },
         transition: {
           type: "fade",
-          duration: 600,
+          duration: 700,
         },
         fragment: {
-          duration: 400,
+          duration: 500,
         },
       });
 
       app.start();
-
-      // 暴露到全局方便调试
       window.matcha = app;
     </script>
   </body>

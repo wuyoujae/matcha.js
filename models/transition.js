@@ -1,69 +1,63 @@
 /**
  * @module transition
  * @description 过渡动画模块，支持每页独立的过渡效果
- * @version 2.0.0
- *
- * @syntax
- * 每页过渡效果:
- *   <!-- transition: fade -->
- *   <!-- transition: slide -->
- *   <!-- transition: zoom, duration=800 -->
- *
- * 效果列表: fade, slide, slideUp, zoom, zoomIn, flip, flipY, cube, none
+ * @version 2.1.0 - 优化动画流畅度
  */
 class Transition {
   constructor(options = {}) {
     this.options = {
       defaultType: options.type || "fade",
-      defaultDuration: options.duration || 600,
-      defaultEasing: options.easing || "cubic-bezier(0.16, 1, 0.3, 1)",
+      // 增加默认时长，更流畅
+      defaultDuration: options.duration || 700,
+      // 使用更平滑的缓动
+      defaultEasing: options.easing || "cubic-bezier(0.4, 0, 0.2, 1)",
       ...options,
     };
 
-    // 预设过渡效果
+    // 预设过渡效果 - 优化动画参数
     this.transitions = {
       fade: {
-        enter: { opacity: "0", transform: "none" },
-        active: { opacity: "1", transform: "none" },
-        leave: { opacity: "0", transform: "none" },
+        enter: { opacity: "0", transform: "translateY(10px)" },
+        active: { opacity: "1", transform: "translateY(0)" },
+        leave: { opacity: "0", transform: "translateY(-10px)" },
       },
       slide: {
-        enter: { opacity: "0", transform: "translateX(100%)" },
+        enter: { opacity: "0", transform: "translateX(80px)" },
         active: { opacity: "1", transform: "translateX(0)" },
-        leave: { opacity: "0", transform: "translateX(-100%)" },
+        leave: { opacity: "0", transform: "translateX(-80px)" },
       },
       slideUp: {
-        enter: { opacity: "0", transform: "translateY(100%)" },
+        enter: { opacity: "0", transform: "translateY(60px)" },
         active: { opacity: "1", transform: "translateY(0)" },
-        leave: { opacity: "0", transform: "translateY(-100%)" },
+        leave: { opacity: "0", transform: "translateY(-60px)" },
       },
       zoom: {
-        enter: { opacity: "0", transform: "scale(0.8)" },
+        enter: { opacity: "0", transform: "scale(0.9)" },
         active: { opacity: "1", transform: "scale(1)" },
-        leave: { opacity: "0", transform: "scale(1.2)" },
+        leave: { opacity: "0", transform: "scale(1.05)" },
       },
       zoomIn: {
-        enter: { opacity: "0", transform: "scale(1.2)" },
+        enter: { opacity: "0", transform: "scale(1.1)" },
         active: { opacity: "1", transform: "scale(1)" },
-        leave: { opacity: "0", transform: "scale(0.8)" },
+        leave: { opacity: "0", transform: "scale(0.95)" },
       },
       flip: {
-        enter: { opacity: "0", transform: "rotateY(-90deg)" },
-        active: { opacity: "1", transform: "rotateY(0)" },
-        leave: { opacity: "0", transform: "rotateY(90deg)" },
+        enter: { opacity: "0", transform: "perspective(1200px) rotateY(-60deg)" },
+        active: { opacity: "1", transform: "perspective(1200px) rotateY(0)" },
+        leave: { opacity: "0", transform: "perspective(1200px) rotateY(60deg)" },
       },
       flipY: {
-        enter: { opacity: "0", transform: "rotateX(90deg)" },
-        active: { opacity: "1", transform: "rotateX(0)" },
-        leave: { opacity: "0", transform: "rotateX(-90deg)" },
+        enter: { opacity: "0", transform: "perspective(1200px) rotateX(60deg)" },
+        active: { opacity: "1", transform: "perspective(1200px) rotateX(0)" },
+        leave: { opacity: "0", transform: "perspective(1200px) rotateX(-60deg)" },
       },
       cube: {
-        enter: { opacity: "0", transform: "translateZ(-500px) rotateY(90deg)" },
-        active: { opacity: "1", transform: "translateZ(0) rotateY(0)" },
-        leave: { opacity: "0", transform: "translateZ(-500px) rotateY(-90deg)" },
+        enter: { opacity: "0", transform: "perspective(1200px) translateZ(-300px) rotateY(60deg)" },
+        active: { opacity: "1", transform: "perspective(1200px) translateZ(0) rotateY(0)" },
+        leave: { opacity: "0", transform: "perspective(1200px) translateZ(-300px) rotateY(-60deg)" },
       },
       none: {
-        enter: { opacity: "0", transform: "none" },
+        enter: { opacity: "1", transform: "none" },
         active: { opacity: "1", transform: "none" },
         leave: { opacity: "0", transform: "none" },
       },
@@ -73,26 +67,18 @@ class Transition {
     this.styleElement = null;
   }
 
-  /**
-   * 初始化模块
-   * @param {Matcha} matcha - Matcha 实例引用
-   */
   init(matcha) {
     this.matcha = matcha;
     this._injectBaseStyles();
   }
 
-  /**
-   * 注入基础样式
-   * @private
-   */
   _injectBaseStyles() {
     this.styleElement = document.createElement("style");
     this.styleElement.id = "matcha-transition-module";
     this.styleElement.textContent = `
-/* Matcha Transition Module - Per-slide transitions */
+/* Matcha Transition Module - 流畅的页面切换 */
 #matcha-stage {
-  perspective: 1000px;
+  perspective: 1200px;
   transform-style: preserve-3d;
 }
 
@@ -105,11 +91,6 @@ class Transition {
     document.head.appendChild(this.styleElement);
   }
 
-  /**
-   * 解析过渡指令（不再全局修改，而是返回配置）
-   * @param {string} block - 幻灯片内容块
-   * @returns {Object} { cleanBlock, transitionConfig }
-   */
   parseTransitionDirective(block) {
     let cleanBlock = block;
     let transitionConfig = null;
@@ -127,7 +108,6 @@ class Transition {
 
       cleanBlock = cleanBlock.replace(match[0], "");
 
-      // 解析参数
       if (match[2]) {
         match[2].split(",").forEach((param) => {
           const [key, value] = param.split("=").map((s) => s.trim());
@@ -143,14 +123,8 @@ class Transition {
     return { cleanBlock, transitionConfig };
   }
 
-  /**
-   * 应用过渡配置到幻灯片元素
-   * @param {HTMLElement} slideElement - 幻灯片 DOM 元素
-   * @param {Object} config - { type, duration, easing }
-   */
   applySlideTransition(slideElement, config) {
     if (!config) {
-      // 使用默认配置
       config = {
         type: this.options.defaultType,
         duration: this.options.defaultDuration,
@@ -158,35 +132,29 @@ class Transition {
       };
     }
 
-    // 存储配置到 dataset
     slideElement.dataset.transition = config.type;
     slideElement.dataset.transitionDuration = config.duration;
     slideElement.dataset.transitionEasing = config.easing;
 
-    // 设置过渡时间
-    slideElement.style.transition = `all ${config.duration}ms ${config.easing}`;
+    // 使用更平滑的过渡
+    slideElement.style.transition = `
+      opacity ${config.duration}ms ${config.easing},
+      transform ${config.duration}ms ${config.easing},
+      filter ${config.duration}ms ${config.easing}
+    `;
   }
 
-  /**
-   * 更新幻灯片状态（在 goto 时调用）
-   * @param {HTMLElement} slideElement - 幻灯片 DOM 元素
-   * @param {string} state - 'enter' | 'active' | 'leave'
-   */
   updateSlideState(slideElement, state) {
     const type = slideElement.dataset.transition || this.options.defaultType;
     const trans = this.transitions[type] || this.transitions.fade;
     const config = trans[state] || trans.active;
 
-    // 应用状态样式
     slideElement.style.opacity = config.opacity;
     slideElement.style.transform = config.transform;
     slideElement.style.pointerEvents = state === "active" ? "auto" : "none";
     slideElement.style.zIndex = state === "active" ? "10" : "1";
   }
 
-  /**
-   * 注册自定义过渡效果
-   */
   registerTransition(name, config) {
     this.transitions[name] = {
       enter: config.enter || { opacity: "0", transform: "none" },
@@ -195,16 +163,10 @@ class Transition {
     };
   }
 
-  /**
-   * 获取所有可用过渡效果名称
-   */
   getTransitionNames() {
     return Object.keys(this.transitions);
   }
 
-  /**
-   * 销毁模块
-   */
   destroy() {
     if (this.styleElement && this.styleElement.parentNode) {
       this.styleElement.parentNode.removeChild(this.styleElement);
@@ -214,6 +176,5 @@ class Transition {
   }
 }
 
-// 导出方式
 export default Transition;
 window.MatchaTransition = Transition;

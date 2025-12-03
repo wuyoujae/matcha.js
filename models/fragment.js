@@ -1,124 +1,54 @@
 /**
  * @module fragment
  * @description 分步展示模块 - 内容累加显示，像 PowerPoint 一样
- * @version 2.0.0
+ * @version 2.2.0
  *
  * @syntax
- * 使用 <!-- step --> 分隔内容，每点击一次显示下一段：
- *
- *   # 标题
- *   你好
- *
- *   <!-- step -->
- *
- *   欢迎来到 Matcha!
- *
- *   <!-- step -->
- *
- *   你可以通过 Markdown 快速制作 PPT。
- *
- * 显示顺序：
- *   第1步: "你好"
- *   第2步: "你好" + "欢迎来到 Matcha!"
- *   第3步: "你好" + "欢迎来到 Matcha!" + "你可以通过..."
- *
- * 带过渡效果：
- *   <!-- step: fade -->
- *   <!-- step: slide-up -->
- *   <!-- step: zoom -->
- *
- * 带参数：
- *   <!-- step: slide-up, duration=500 -->
+ * 使用 <!-- step --> 分隔内容，每点击一次显示下一段
  */
 class Fragment {
   constructor(options = {}) {
     this.options = {
-      // 默认过渡效果
       defaultEffect: "fade",
-      // 默认动画时长
-      duration: 400,
-      // 默认缓动
-      easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+      // 增加默认动画时长，让动画更流畅
+      duration: 500,
+      // 使用更平滑的缓动函数
+      easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
       ...options,
-    };
-
-    // 过渡效果定义
-    this.effects = {
-      none: {
-        from: {},
-        to: {},
-      },
-      fade: {
-        from: { opacity: "0" },
-        to: { opacity: "1" },
-      },
-      "slide-up": {
-        from: { opacity: "0", transform: "translateY(30px)" },
-        to: { opacity: "1", transform: "translateY(0)" },
-      },
-      "slide-down": {
-        from: { opacity: "0", transform: "translateY(-30px)" },
-        to: { opacity: "1", transform: "translateY(0)" },
-      },
-      "slide-left": {
-        from: { opacity: "0", transform: "translateX(50px)" },
-        to: { opacity: "1", transform: "translateX(0)" },
-      },
-      "slide-right": {
-        from: { opacity: "0", transform: "translateX(-50px)" },
-        to: { opacity: "1", transform: "translateX(0)" },
-      },
-      zoom: {
-        from: { opacity: "0", transform: "scale(0.8)" },
-        to: { opacity: "1", transform: "scale(1)" },
-      },
-      "zoom-in": {
-        from: { opacity: "0", transform: "scale(1.2)" },
-        to: { opacity: "1", transform: "scale(1)" },
-      },
-      bounce: {
-        from: { opacity: "0", transform: "scale(0.5)" },
-        to: { opacity: "1", transform: "scale(1)" },
-        easing: "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
-      },
     };
 
     this.matcha = null;
     this.styleElement = null;
-
-    // 每页的分步状态
     this.slideStates = {};
   }
 
-  /**
-   * 初始化模块
-   */
   init(matcha) {
     this.matcha = matcha;
     this._injectStyles();
   }
 
-  /**
-   * 注入样式
-   * @private
-   */
   _injectStyles() {
     this.styleElement = document.createElement("style");
     this.styleElement.id = "matcha-fragment-module";
     this.styleElement.textContent = `
-/* Matcha Fragment Module - 分步内容累加显示 */
-
-/* 步骤块 */
+/* Matcha Fragment Module - 流畅的分步动画 */
 .matcha-step-block {
-  transition: opacity var(--step-duration, ${this.options.duration}ms) var(--step-easing, ${this.options.easing}),
-              transform var(--step-duration, ${this.options.duration}ms) var(--step-easing, ${this.options.easing});
+  /* 更长的动画时间，更平滑的缓动 */
+  transition: 
+    opacity var(--step-duration, ${this.options.duration}ms) var(--step-easing, ${this.options.easing}),
+    transform var(--step-duration, ${this.options.duration}ms) var(--step-easing, ${this.options.easing}),
+    filter var(--step-duration, ${this.options.duration}ms) var(--step-easing, ${this.options.easing});
+  will-change: opacity, transform;
 }
 
 /* 隐藏状态 */
 .matcha-step-block.step-hidden {
   opacity: 0;
   pointer-events: none;
-  position: absolute;
+  max-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
   visibility: hidden;
 }
 
@@ -126,133 +56,153 @@ class Fragment {
 .matcha-step-block.step-visible {
   opacity: 1;
   pointer-events: auto;
-  position: relative;
+  max-height: 9999px;
+  visibility: visible;
+  transform: none !important;
+  filter: none;
+}
+
+/* 进入动画初始状态 */
+.matcha-step-block.step-entering {
+  opacity: 0;
+  max-height: 9999px;
   visibility: visible;
 }
 
-/* 过渡效果的初始状态 */
-.matcha-step-block.step-entering {
-  opacity: 0;
+/* 各种效果的初始状态 */
+.matcha-step-block.step-entering[data-effect="fade"] {
+  transform: none;
+  filter: blur(4px);
 }
 
 .matcha-step-block.step-entering[data-effect="slide-up"] {
-  transform: translateY(30px);
+  transform: translateY(40px);
 }
 
 .matcha-step-block.step-entering[data-effect="slide-down"] {
-  transform: translateY(-30px);
+  transform: translateY(-40px);
 }
 
 .matcha-step-block.step-entering[data-effect="slide-left"] {
-  transform: translateX(50px);
+  transform: translateX(60px);
 }
 
 .matcha-step-block.step-entering[data-effect="slide-right"] {
-  transform: translateX(-50px);
+  transform: translateX(-60px);
 }
 
-.matcha-step-block.step-entering[data-effect="zoom"],
-.matcha-step-block.step-entering[data-effect="bounce"] {
-  transform: scale(0.8);
+.matcha-step-block.step-entering[data-effect="zoom"] {
+  transform: scale(0.85);
+  filter: blur(2px);
 }
 
 .matcha-step-block.step-entering[data-effect="zoom-in"] {
-  transform: scale(1.2);
+  transform: scale(1.15);
+  filter: blur(2px);
 }
 
-/* 显示后恢复正常 */
-.matcha-step-block.step-visible {
-  transform: none;
+.matcha-step-block.step-entering[data-effect="bounce"] {
+  transform: scale(0.7) translateY(20px);
+}
+
+.matcha-step-block.step-entering[data-effect="flip"] {
+  transform: perspective(600px) rotateX(-30deg);
+  transform-origin: top center;
+}
+
+/* bounce 效果使用特殊的缓动 */
+.matcha-step-block[data-effect="bounce"] {
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* flip 效果 */
+.matcha-step-block[data-effect="flip"] {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
     `;
     document.head.appendChild(this.styleElement);
   }
 
   /**
-   * 处理 Markdown 文本，将 step 分隔符转换为特殊标记
-   * 在 renderMarkdown 之前调用
-   * @param {string} markdown - 原始 Markdown
-   * @returns {string} 处理后的 Markdown
+   * 解析内容中的分步标记并构建 HTML
    */
-  preprocessMarkdown(markdown) {
-    // 将 <!-- step --> 或 <!-- step: effect --> 转换为特殊标记
-    // 这个标记会在 HTML 渲染后被处理
-    let stepIndex = 0;
-    return markdown.replace(
-      /<!--\s*step(?::\s*([\w-]+))?(?:\s*,\s*(.+?))?\s*-->/g,
-      (match, effect, params) => {
-        stepIndex++;
-        const effectName = effect || this.options.defaultEffect;
-        let duration = this.options.duration;
-
-        // 解析参数
-        if (params) {
-          const durationMatch = params.match(/duration\s*=\s*(\d+)/);
-          if (durationMatch) {
-            duration = parseInt(durationMatch[1]);
-          }
+  parseAndRender(content, slideIndex, renderFn) {
+    const stepPattern = /<!--\s*step(?::\s*([\w-]+))?(?:\s*,\s*duration\s*=\s*(\d+))?\s*-->/g;
+    
+    const steps = [];
+    let match;
+    let lastIndex = 0;
+    
+    while ((match = stepPattern.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        const beforeContent = content.slice(lastIndex, match.index);
+        if (beforeContent.trim()) {
+          steps.push({
+            content: beforeContent,
+            effect: steps.length === 0 ? "none" : (steps[steps.length - 1]?.nextEffect || this.options.defaultEffect),
+            duration: steps.length === 0 ? 0 : (steps[steps.length - 1]?.nextDuration || this.options.duration),
+          });
         }
-
-        // 返回特殊标记，HTML 渲染后会保留
-        return `__MATCHA_STEP_${stepIndex}_${effectName}_${duration}__`;
       }
-    );
-  }
-
-  /**
-   * 处理渲染后的 HTML，将特殊标记转换为 step 块
-   * @param {string} html - 渲染后的 HTML
-   * @param {number} slideIndex - 幻灯片索引
-   * @returns {string} 处理后的 HTML
-   */
-  processHTML(html, slideIndex) {
-    // 查找所有 step 标记
-    const stepMarkers = html.match(/__MATCHA_STEP_(\d+)_([\w-]+)_(\d+)__/g);
-
-    if (!stepMarkers || stepMarkers.length === 0) {
-      // 没有分步，整个内容作为第一步
-      this.slideStates[slideIndex] = {
-        currentStep: 1,
-        totalSteps: 1,
-      };
-      return `<div class="matcha-step-block step-visible" data-step="1">${html}</div>`;
-    }
-
-    // 按 step 标记分割内容
-    const parts = html.split(/__MATCHA_STEP_\d+_[\w-]+_\d+__/);
-    let result = "";
-
-    // 第一部分（step 1）- 初始显示
-    if (parts[0].trim()) {
-      result += `<div class="matcha-step-block step-visible" data-step="1" data-effect="none">${parts[0]}</div>`;
-    }
-
-    // 后续部分（step 2, 3, ...）- 初始隐藏
-    stepMarkers.forEach((marker, index) => {
-      const match = marker.match(/__MATCHA_STEP_(\d+)_([\w-]+)_(\d+)__/);
-      const stepNum = index + 2; // step 2 开始
-      const effect = match[2];
-      const duration = match[3];
-      const content = parts[index + 1] || "";
-
-      if (content.trim()) {
-        result += `<div class="matcha-step-block step-hidden" data-step="${stepNum}" data-effect="${effect}" data-duration="${duration}">${content}</div>`;
+      
+      if (steps.length > 0) {
+        steps[steps.length - 1].nextEffect = match[1] || this.options.defaultEffect;
+        steps[steps.length - 1].nextDuration = match[2] ? parseInt(match[2]) : this.options.duration;
+      } else {
+        steps.push({
+          content: "",
+          effect: "none",
+          duration: 0,
+          nextEffect: match[1] || this.options.defaultEffect,
+          nextDuration: match[2] ? parseInt(match[2]) : this.options.duration,
+        });
       }
-    });
-
-    // 记录该页的分步状态
-    const totalSteps = stepMarkers.length + 1;
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    if (lastIndex < content.length) {
+      const remainingContent = content.slice(lastIndex);
+      if (remainingContent.trim()) {
+        const lastStep = steps[steps.length - 1];
+        steps.push({
+          content: remainingContent,
+          effect: lastStep?.nextEffect || this.options.defaultEffect,
+          duration: lastStep?.nextDuration || this.options.duration,
+        });
+      }
+    }
+    
+    if (steps.length === 0) {
+      steps.push({
+        content: content,
+        effect: "none",
+        duration: 0,
+      });
+    }
+    
+    const validSteps = steps.filter(step => step.content.trim());
+    
     this.slideStates[slideIndex] = {
       currentStep: 1,
-      totalSteps: totalSteps,
+      totalSteps: validSteps.length,
     };
-
-    return result;
+    
+    let html = "";
+    validSteps.forEach((step, index) => {
+      const stepNum = index + 1;
+      const isFirst = index === 0;
+      const visibleClass = isFirst ? "step-visible" : "step-hidden";
+      const renderedContent = renderFn(step.content);
+      const duration = step.duration || this.options.duration;
+      
+      html += `<div class="matcha-step-block ${visibleClass}" data-step="${stepNum}" data-effect="${step.effect}" style="--step-duration: ${duration}ms;">${renderedContent}</div>`;
+    });
+    
+    return html;
   }
 
-  /**
-   * 初始化幻灯片的分步（在构建 DOM 后调用）
-   */
   initSlide(slideElement, slideIndex) {
     const blocks = slideElement.querySelectorAll(".matcha-step-block");
     const state = this.slideStates[slideIndex] || { currentStep: 1, totalSteps: blocks.length };
@@ -261,21 +211,17 @@ class Fragment {
     state.totalSteps = blocks.length;
     this.slideStates[slideIndex] = state;
 
-    // 设置初始状态：只显示第一步
     blocks.forEach((block, i) => {
       if (i === 0) {
         block.classList.add("step-visible");
-        block.classList.remove("step-hidden");
+        block.classList.remove("step-hidden", "step-entering");
       } else {
         block.classList.add("step-hidden");
-        block.classList.remove("step-visible");
+        block.classList.remove("step-visible", "step-entering");
       }
     });
   }
 
-  /**
-   * 重置幻灯片到第一步
-   */
   resetSlide(slideIndex) {
     const state = this.slideStates[slideIndex];
     if (!state || !state.blocks) return;
@@ -294,9 +240,6 @@ class Fragment {
     });
   }
 
-  /**
-   * 显示所有步骤（用于往回切换时）
-   */
   showAllSteps(slideIndex) {
     const state = this.slideStates[slideIndex];
     if (!state || !state.blocks) return;
@@ -309,28 +252,25 @@ class Fragment {
     });
   }
 
-  /**
-   * 显示下一步
-   * @returns {boolean} 是否还有更多步骤
-   */
   nextStep(slideIndex) {
     const state = this.slideStates[slideIndex];
     if (!state || !state.blocks) return false;
 
-    // 已经显示所有步骤
     if (state.currentStep >= state.totalSteps) {
       return false;
     }
 
-    // 显示下一个 block
     const nextBlock = state.blocks[state.currentStep];
     if (nextBlock) {
-      // 先添加 entering 类（设置初始状态）
+      // 先移除 hidden，添加 entering（设置初始动画状态）
       nextBlock.classList.remove("step-hidden");
       nextBlock.classList.add("step-entering");
 
-      // 强制重排后添加 visible 类（触发动画）
+      // 用 requestAnimationFrame 确保浏览器渲染了初始状态
+      // 然后触发过渡动画
       requestAnimationFrame(() => {
+        // 强制重排
+        nextBlock.offsetHeight;
         requestAnimationFrame(() => {
           nextBlock.classList.remove("step-entering");
           nextBlock.classList.add("step-visible");
@@ -343,20 +283,14 @@ class Fragment {
     return state.currentStep < state.totalSteps;
   }
 
-  /**
-   * 回退到上一步
-   * @returns {boolean} 是否还可以继续回退
-   */
   prevStep(slideIndex) {
     const state = this.slideStates[slideIndex];
     if (!state || !state.blocks) return false;
 
-    // 已经是第一步
     if (state.currentStep <= 1) {
       return false;
     }
 
-    // 隐藏当前步骤的 block
     const currentBlock = state.blocks[state.currentStep - 1];
     if (currentBlock) {
       currentBlock.classList.remove("step-visible");
@@ -367,49 +301,27 @@ class Fragment {
     return state.currentStep > 1;
   }
 
-  /**
-   * 检查是否有分步
-   */
   hasSteps(slideIndex) {
     const state = this.slideStates[slideIndex];
     return state && state.totalSteps > 1;
   }
 
-  /**
-   * 检查是否有下一步
-   */
   hasNextStep(slideIndex) {
     const state = this.slideStates[slideIndex];
     return state && state.currentStep < state.totalSteps;
   }
 
-  /**
-   * 检查是否可以回退
-   */
   hasPrevStep(slideIndex) {
     const state = this.slideStates[slideIndex];
     return state && state.currentStep > 1;
   }
 
-  /**
-   * 获取步骤状态
-   */
   getStepState(slideIndex) {
     const state = this.slideStates[slideIndex];
     if (!state) return { current: 1, total: 1 };
     return { current: state.currentStep, total: state.totalSteps };
   }
 
-  /**
-   * 注册自定义效果
-   */
-  registerEffect(name, config) {
-    this.effects[name] = config;
-  }
-
-  /**
-   * 销毁模块
-   */
   destroy() {
     if (this.styleElement && this.styleElement.parentNode) {
       this.styleElement.parentNode.removeChild(this.styleElement);
@@ -420,32 +332,5 @@ class Fragment {
   }
 }
 
-// 导出
 export default Fragment;
 window.MatchaFragment = Fragment;
-
-/*
- * ============================================
- * 使用示例
- * ============================================
- *
- * ---
- * <!-- layout: center -->
- *
- * # 你好
- *
- * <!-- step: fade -->
- *
- * 欢迎来到 Matcha!
- *
- * <!-- step: slide-up -->
- *
- * 你可以通过 Markdown 快速制作 PPT。
- *
- * ---
- *
- * 显示效果：
- * 第1步: "你好"
- * 第2步: "你好" + "欢迎来到 Matcha!"（淡入）
- * 第3步: "你好" + "欢迎来到 Matcha!" + "你可以通过..."（从下滑入）
- */

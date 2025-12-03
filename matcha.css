@@ -1,0 +1,249 @@
+/* matcha.css - V2 Art & Layout Update */
+:root {
+  --matcha-bg: #121212;
+  --matcha-fg: #e0e0e0;
+  --matcha-accent: #00c853; /* 鲜亮的抹茶绿 */
+  --matcha-secondary: #ff4081; /* 强调色 */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --gap-size: 40px;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-main);
+  background: var(--matcha-bg);
+  color: var(--matcha-fg);
+  /* 加一点微妙的背景纹理，提升质感 */
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    #1a1a1a 0%,
+    #121212 100%
+  );
+}
+
+#matcha-stage {
+  width: 100vw;
+  height: 100vh;
+  perspective: 1000px;
+  position: relative;
+}
+
+/* --- 幻灯片基础 --- */
+.matcha-slide {
+  position: absolute;
+  inset: 0; /* top/left/bottom/right: 0 */
+  padding: 60px 80px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 30px, -30px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.matcha-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0);
+  z-index: 10;
+}
+.matcha-slide.past {
+  opacity: 0;
+  transform: translate3d(0, -30px, 30px);
+}
+
+/* --- 核心布局系统 (Layout System) --- */
+
+/* 1. 默认居中 (Center) - 适合封面 */
+.matcha-slide.layout-center {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* 2. 文档流 (Document) - 适合长文本，靠左对齐，从上到下 */
+.matcha-slide.layout-doc {
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+/* 3. 网格分栏 (Columns) - 自动处理分栏 */
+.matcha-slide .matcha-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 默认两列 */
+  gap: var(--gap-size);
+  width: 100%;
+  height: 100%;
+  align-items: center; /* 垂直居中 */
+}
+/* 如果有三列，JS 会动态调整，或者我们可以写更智能的 CSS */
+
+/* --- 组件美化 --- */
+
+/* 标题 */
+h1 {
+  font-size: 4rem;
+  line-height: 1.1;
+  margin-bottom: 0.5em;
+  background: linear-gradient(45deg, #fff, #999);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5em;
+  color: var(--matcha-accent);
+  border-left: 5px solid var(--matcha-accent);
+  padding-left: 20px;
+}
+h3 {
+  font-size: 1.8rem;
+  color: #bbb;
+  margin-top: 1em;
+}
+
+/* 文本 */
+p,
+li {
+  font-size: 1.4rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.8em;
+}
+strong {
+  color: var(--matcha-accent);
+}
+
+/* 代码块 - 卡片化 */
+pre {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  overflow-x: auto;
+}
+code {
+  font-family: "Fira Code", monospace;
+  color: #a5d6ff;
+}
+
+/* 引用 - 玻璃拟态 */
+blockquote {
+  background: var(--glass-bg);
+  border-left: 6px solid var(--matcha-secondary);
+  padding: 30px;
+  border-radius: 0 12px 12px 0;
+  margin: 20px 0;
+  font-style: italic;
+}
+
+/* 图片 */
+img {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  object-fit: contain;
+}
+
+/* 表格样式 */
+.matcha-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 1.2rem;
+  background: var(--glass-bg);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.matcha-table th,
+.matcha-table td {
+  padding: 12px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.matcha-table th {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--matcha-accent);
+  font-weight: 600;
+}
+
+.matcha-table tr:last-child td {
+  border-bottom: none;
+}
+
+.matcha-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* 斜体和删除线 */
+em {
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+del {
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: line-through;
+}
+
+/* 列表样式 */
+ul {
+  list-style: none;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+ul li {
+  position: relative;
+  padding-left: 0.5em;
+}
+
+ul li::before {
+  content: "▸";
+  position: absolute;
+  left: -1em;
+  color: var(--matcha-accent);
+}
+
+/* 水平线 */
+hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--matcha-accent),
+    transparent
+  );
+  margin: 2em 0;
+}
+
+/* 进度条 */
+#matcha-progress {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--matcha-accent),
+    var(--matcha-secondary)
+  );
+  width: 0%;
+  transition: width 0.3s;
+  z-index: 100;
+}

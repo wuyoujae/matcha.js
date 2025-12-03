@@ -15,87 +15,76 @@
 
       # 🍵 Matcha V6
 
-      ### 轻量 · 模块化 · 超越 Reveal.js
-
       <!-- step: fade -->
 
-      *点击或按 → 继续*
+      ### 轻量 · 模块化 · 超越 Reveal.js
 
       <!-- step: slide-up -->
 
-      **支持分步展示，就像 PowerPoint！**
+      *点击或按 → 继续*
 
       ---
 
       <!-- layout: center -->
       <!-- transition: slide -->
+
+      ## 分步展示演示
+
+      这是第一步，进入页面就能看到
+
+      <!-- step: fade -->
+
+      这是第二步，点击后出现（淡入效果）
+
+      <!-- step: slide-up -->
+
+      这是第三步，继续点击后出现（从下滑入）
+
+      <!-- step: zoom -->
+
+      第四步！缩放出现 ✨
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: zoom -->
       <!-- theme: ocean -->
 
       ## 🌊 每页独立主题
 
-      这一页使用 **Ocean** 主题
+      这一页用 **Ocean** 主题
 
-      <!-- step -->
+      <!-- step: fade -->
 
-      主题在切换页面时会跟随变化
+      切换页面时，主题也会跟着变化
 
-      <!-- step: zoom -->
+      <!-- step: slide-left -->
 
       `<!-- theme: ocean -->`
 
       ---
 
       <!-- layout: center -->
-      <!-- transition: zoom -->
+      <!-- transition: flip -->
       <!-- theme: sakura -->
 
       ## 🌸 Sakura 主题
 
-      这一页使用 **Sakura** 主题
-
-      <!-- step: slide-up -->
-
-      每一页都可以有不同的：
-      
-      <!-- step -->
-      
-      - 主题 🎨
-      
-      <!-- step -->
-      
-      - 过渡动画 🎬
-      
-      <!-- step -->
-      
-      - 布局方式 📐
-
-      ---
-
-      <!-- layout: center -->
-      <!-- transition: flip -->
-      <!-- theme: sunset -->
-
-      ## 🌅 分步展示演示
-
       <!-- step: fade -->
 
-      ### 第一步：淡入
+      每页可以设置不同的：
 
       <!-- step: slide-up -->
 
-      ### 第二步：从下滑入
+      🎨 主题
 
-      <!-- step: slide-left -->
+      <!-- step: slide-up -->
 
-      ### 第三步：从右滑入
+      🎬 过渡动画
 
-      <!-- step: zoom -->
+      <!-- step: slide-up -->
 
-      ### 第四步：缩放出现
-
-      <!-- step: bounce -->
-
-      ### 第五步：弹跳！
+      📐 布局方式
 
       ---
 
@@ -103,28 +92,31 @@
       <!-- transition: slide -->
       <!-- theme: matcha -->
 
-      ## 📝 分步语法
+      ## 分步语法
 
-      <!-- step -->
+      使用 `<!-- step -->` 分隔内容
 
-      简单的分步标记：
+      <!-- step: fade -->
 
       ```markdown
-      <!-- step -->
-      这段内容点击后显示
+      # 标题
+
+      第一步内容
+
+      <!-- step: fade -->
+
+      第二步内容（淡入）
 
       <!-- step: slide-up -->
-      带效果的分步
 
-      <!-- step: zoom, delay=200 -->
-      带延迟的分步
+      第三步内容（从下滑入）
       ```
 
       +++
 
       ## 可用效果
 
-      <!-- step: slide-up -->
+      <!-- step: fade -->
 
       | 效果 | 说明 |
       |------|------|
@@ -143,51 +135,50 @@
 
       ## 交互方式
 
-      <!-- step -->
-
       **下一步**：
+
+      <!-- step: fade -->
+
       - 点击屏幕任意位置
       - 按 → 或 ↓ 键
       - 按空格或回车
 
-      <!-- step -->
+      <!-- step: fade -->
 
       **上一步**：
+
+      <!-- step: fade -->
+
       - 右键点击
       - 按 ← 或 ↑ 键
 
-      <!-- step -->
-
-      **快捷跳转**：
-      - Home 键 → 第一页
-      - End 键 → 最后一页
-
       <!-- step: bounce -->
 
-      > 💡 分步展示和页面切换无缝衔接，就像真正的 PPT！
+      > 💡 分步内容是**累加显示**的，就像 PowerPoint！
 
       ---
 
       <!-- layout: center -->
       <!-- transition: cube -->
-      <!-- theme: mono -->
+      <!-- theme: sunset -->
 
-      ## ⚪ 极简 Mono 主题
+      ## 🌅 内容累加原理
 
-      <!-- step -->
+      <!-- step: fade -->
 
-      黑白配色，专业简约
+      第1步：显示 "你好"
 
       <!-- step: slide-up -->
 
-      每个主题都有配套的：
+      第2步：显示 "你好" + "欢迎来到 Matcha!"
 
-      <!-- step -->
+      <!-- step: slide-left -->
 
-      - 背景色
-      - 文字色
-      - 强调色
-      - 字体
+      第3步：继续累加更多内容...
+
+      <!-- step: zoom -->
+
+      就像真正的 PPT 动画！
 
       ---
 
@@ -201,21 +192,20 @@
 
       ## 📸 图文混排
 
-      <!-- step -->
+      <!-- step: fade -->
 
-      Matcha 支持灵活的布局
+      支持灵活的布局
 
       <!-- step: slide-left -->
 
-      - 居中布局
+      - 居中布局 (center)
       - 横分布局 (cols)
       - 纵分布局 (rows)
-      - 网格布局 (grid)
       - 文档布局 (doc)
 
       <!-- step: zoom -->
 
-      **每个布局都支持分步展示！**
+      **每种布局都支持分步！**
 
       ---
 
@@ -225,7 +215,7 @@
 
       ## ⚡ 快速开始
 
-      <!-- step -->
+      <!-- step: fade -->
 
       ```html
       <script type="module">
@@ -246,19 +236,13 @@
 
       # 🙏 感谢使用
 
-      ### Matcha.js V6
-
       <!-- step: fade -->
 
-      ✨ 每页独立主题
+      ### Matcha.js V6
 
       <!-- step: slide-up -->
 
-      🎬 每页独立动画
-
-      <!-- step: slide-left -->
-
-      👆 分步展示支持
+      ✨ 每页独立主题 · 🎬 独立动画 · 👆 分步展示
 
       <!-- step: bounce -->
 

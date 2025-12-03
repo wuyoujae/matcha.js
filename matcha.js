@@ -39,13 +39,13 @@ class Matcha {
     // 进度条
     this.modules.progressBar = new ProgressBar(this.config.progressBar);
 
-    // 样式模块（每页独立）
+    // 样式模块
     this.modules.style = new Style(this.config.style);
 
     // 布局模块
     this.modules.layout = new Layout(this.config.layout);
 
-    // 过渡动画模块（每页独立）
+    // 过渡动画模块
     this.modules.transition = new Transition(this.config.transition);
 
     // 分步展示模块
@@ -103,11 +103,11 @@ class Matcha {
     slideBlocks.forEach((block) => {
       if (!block.trim()) return;
 
-      // 1. 解析过渡指令（每页独立）
+      // 1. 解析过渡指令
       const { cleanBlock: afterTransition, transitionConfig } =
         this.modules.transition.parseTransitionDirective(block);
 
-      // 2. 解析样式/主题指令（每页独立）
+      // 2. 解析样式/主题指令
       const {
         cleanBlock: afterStyle,
         themeName,
@@ -118,22 +118,31 @@ class Matcha {
       const { cleanBlock, layoutType, layoutParams } =
         this.modules.layout.parseLayoutDirective(afterStyle);
 
-      // 4. 构建 DOM
+      // 4. 预处理分步标记（在 Markdown 渲染之前）
+      const preprocessedContent =
+        this.modules.fragment.preprocessMarkdown(cleanBlock);
+
+      // 5. 构建 DOM（使用自定义渲染函数处理分步）
       const slideDiv = this.modules.layout.buildLayout(
-        cleanBlock,
+        preprocessedContent,
         layoutType,
         layoutParams,
-        (text) => this.renderMarkdown(text)
+        (text) => {
+          // 渲染 Markdown
+          const html = this.modules.markdowmParse.parse(text);
+          // 处理分步标记，转换为 step blocks
+          return this.modules.fragment.processHTML(html, slideIndex);
+        }
       );
 
-      // 5. 应用每页独立的主题
+      // 6. 应用每页独立的主题
       this.modules.style.applySlideTheme(slideDiv, themeName, styles);
 
-      // 6. 应用每页独立的过渡配置
+      // 7. 应用每页独立的过渡配置
       this.modules.transition.applySlideTransition(slideDiv, transitionConfig);
 
-      // 7. 初始化该页的分步状态
-      this.modules.fragment.initSlideFragments(slideDiv, slideIndex);
+      // 8. 初始化该页的分步状态
+      this.modules.fragment.initSlide(slideDiv, slideIndex);
 
       stage.appendChild(slideDiv);
       this.slidesElements.push(slideDiv);
@@ -160,17 +169,14 @@ class Matcha {
     // 更新所有幻灯片状态
     this.slidesElements.forEach((el, i) => {
       if (i === index) {
-        // 当前页
         this.modules.transition.updateSlideState(el, "active");
         el.classList.add("active");
         el.classList.remove("past");
       } else if (i < index) {
-        // 过去的页
         this.modules.transition.updateSlideState(el, "leave");
         el.classList.add("past");
         el.classList.remove("active");
       } else {
-        // 未来的页
         this.modules.transition.updateSlideState(el, "enter");
         el.classList.remove("active", "past");
       }
@@ -178,10 +184,10 @@ class Matcha {
 
     // 分步状态处理
     if (direction === "forward") {
-      // 往前走：重置新页面的分步
+      // 往前走：重置新页面的分步到第一步
       this.modules.fragment.resetSlide(index);
     } else {
-      // 往回走：显示所有分步
+      // 往回走：显示所有分步内容
       this.modules.fragment.showAllSteps(index);
     }
 

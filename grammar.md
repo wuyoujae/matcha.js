@@ -262,25 +262,43 @@ matcha.modules.transition.registerTransition("myEffect", {
 
 > 文件：`models/fragment.js`
 
-像 PowerPoint 一样逐步显示内容，点击或按键触发下一步。
+像 PowerPoint 一样**逐步累加显示**内容。使用 `<!-- step -->` 作为分隔符。
+
+### 核心概念
+
+分步是**内容累加**显示，不是替换：
+
+```
+进入页面 → 显示第一段内容
+点击     → 第一段 + 第二段
+再点击   → 第一段 + 第二段 + 第三段
+```
 
 ### 基础语法
 
+使用 `<!-- step -->` 分隔内容：
+
 ```markdown
-<!-- step -->
+# 你好
 
-第一步显示的内容
-
-<!-- step -->
-
-第二步显示的内容
+这是第一步，进入页面就能看到
 
 <!-- step -->
 
-第三步显示的内容
+这是第二步，点击后出现
+
+<!-- step -->
+
+这是第三步，继续点击后出现
 ```
 
-### 带效果的分步
+**显示效果**：
+
+- 第 1 步: "你好 这是第一步..."
+- 第 2 步: "你好 这是第一步..." + "这是第二步..."（累加）
+- 第 3 步: 继续累加第三段
+
+### 带过渡效果
 
 | 效果        | 语法                         | 说明         |
 | ----------- | ---------------------------- | ------------ |
@@ -292,69 +310,31 @@ matcha.modules.transition.registerTransition("myEffect", {
 | zoom        | `<!-- step: zoom -->`        | 缩放出现     |
 | zoom-in     | `<!-- step: zoom-in -->`     | 放大进入     |
 | bounce      | `<!-- step: bounce -->`      | 弹跳出现     |
-| flip        | `<!-- step: flip -->`        | 翻转出现     |
 
 ```markdown
+# 标题
+
+第一步内容
+
+<!-- step: fade -->
+
+淡入显示的第二步
+
 <!-- step: slide-up -->
 
-从下方滑入的内容
+从下滑入的第三步
 
 <!-- step: bounce -->
 
-弹跳出现的内容
+弹跳出现的第四步！
 ```
 
-### 带延迟的分步
+### 自定义动画时长
 
 ```markdown
-<!-- step: fade, delay=200 -->
+<!-- step: slide-up, duration=800 -->
 
-延迟 200ms 后显示
-```
-
-### 指定顺序
-
-```markdown
-<!-- step: fade, order=2 -->
-
-这个第二步显示
-
-<!-- step: fade, order=1 -->
-
-这个第一步显示（即使写在后面）
-```
-
-### 列表自动分步
-
-```markdown
-<!-- step-list -->
-
-- 第一项（点击显示）
-- 第二项（再点击显示）
-- 第三项（继续点击）
-<!-- /step-list -->
-```
-
-带效果的列表：
-
-```markdown
-<!-- step-list: slide-up -->
-
-- 从下滑入的项目 1
-- 从下滑入的项目 2
-<!-- /step-list -->
-```
-
-### 分组同时显示
-
-```markdown
-<!-- step-group -->
-
-这两段内容会同时出现
-
-因为它们在同一个 group 里
-
-<!-- /step-group -->
+这段内容用 800ms 的动画时长
 ```
 
 ### 交互方式
@@ -366,21 +346,24 @@ matcha.modules.transition.registerTransition("myEffect", {
 | 第一页   | Home 键                 |
 | 最后一页 | End 键                  |
 
+> 💡 **往回切换页面时**，会自动显示该页的所有内容（不用重新点击）
+
 ### JavaScript 控制
 
 ```javascript
-// 手动触发下一步
+// 下一步 / 上一步
 matcha.next();
-
-// 手动回退
 matcha.prev();
 
-// 检查当前页是否有分步
-matcha.modules.fragment.hasSteps(0);
+// 检查是否有分步
+matcha.modules.fragment.hasSteps(slideIndex);
+
+// 检查是否有下一步
+matcha.modules.fragment.hasNextStep(slideIndex);
 
 // 获取分步状态
-matcha.modules.fragment.getStepState(0);
-// { current: 2, total: 5 }
+matcha.modules.fragment.getStepState(slideIndex);
+// { current: 2, total: 4 }
 ```
 
 ---

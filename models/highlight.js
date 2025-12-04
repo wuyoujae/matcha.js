@@ -59,26 +59,23 @@ class Highlight {
 
 /* 聚焦模式下的幻灯片 */
 .matcha-slide.highlight-focus-mode {
-  --dim-opacity: ${this.options.dimOpacity};
+  --mask-opacity: 0.8;
   --highlight-duration: ${this.options.duration}ms;
   --highlight-easing: ${this.options.easing};
 }
 
-/* 聚焦模式下使用遮罩层覆盖整个幻灯片 */
+/* 移除旧的遮罩层 */
 .matcha-slide.highlight-focus-mode::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, var(--dim-opacity));
-  z-index: 5;
-  pointer-events: none;
-  transition: background var(--highlight-duration) var(--highlight-easing);
+  display: none;
 }
 
-/* 高亮元素浮在遮罩层之上 */
+/* 高亮元素使用巨大的阴影作为反向遮罩 */
 .matcha-slide.highlight-focus-mode .matcha-highlight.highlight-active {
   position: relative;
   z-index: 10;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, var(--mask-opacity));
+  border-radius: 4px;
+  pointer-events: auto;
 }
     `;
     document.head.appendChild(this.styleElement);

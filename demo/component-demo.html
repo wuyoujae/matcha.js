@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matcha V8 - 组件系统演示</title>
+    <link rel="stylesheet" href="../matcha.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  </head>
+  <body>
+    <div id="matcha-stage"></div>
+
+    <script id="matcha-source" type="text/markdown">
+      <!-- ================================ -->
+      <!-- 📦 组件定义区（无需 --- 分隔） -->
+      <!-- ================================ -->
+
+      <!-- define: page-number, position=bottom-right -->
+
+      📄 **{{$slideNumber}}** / {{$totalSlides}}
+
+      <!-- enddefine -->
+
+      <!-- define: chapter-nav, position=left -->
+
+      {{#eq chapter 1}}**👉 介绍**{{/eq}}{{#neq chapter 1}}介绍{{/neq}}
+      {{#eq chapter 2}}**👉 语法**{{/eq}}{{#neq chapter 2}}语法{{/neq}}
+      {{#eq chapter 3}}**👉 进阶**{{/eq}}{{#neq chapter 3}}进阶{{/neq}}
+      {{#eq chapter 4}}**👉 实战**{{/eq}}{{#neq chapter 4}}实战{{/neq}}
+
+      <!-- enddefine -->
+
+      <!-- define: top-title, position=top -->
+
+      🍵 **Matcha V8** - 组件化系统
+
+      <!-- enddefine -->
+
+      <!-- define: progress-bar, position=bottom -->
+
+      {{#repeat total}}{{#eq $i current}}●{{/eq}}{{#neq $i current}}○{{/neq}} {{/repeat}}
+
+      <!-- enddefine -->
+
+      <!-- define: author-badge, position=bottom-left -->
+
+      👤 {{name}} · {{role}}
+
+      <!-- enddefine -->
+
+      <!-- ================================ -->
+      <!-- 🎬 幻灯片内容区（直接开始） -->
+      <!-- ================================ -->
+
+      <!-- layout: center -->
+      <!-- transition: fade -->
+
+      # 🍵 Matcha V8
+
+      ### 组件化系统演示
+
+      <!-- step: slide-up -->
+
+      _点击或按 → 继续_
+
+      <!-- @page-number -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: slide -->
+
+      ## ✨ 组件是固定位置的！
+
+      <!-- step: fade -->
+
+      组件不会随页面滚动，而是**固定在屏幕边缘**
+
+      <!-- step: slide-up -->
+
+      看右下角 👉 页码组件
+
+      看底部 👇 进度条组件
+
+      <!-- @page-number -->
+      <!-- @progress-bar: current=1, total=10 -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: zoom -->
+
+      ## 📍 9 个位置选项
+
+      <!-- step: fade -->
+
+      | 位置   | 参数           |
+      | ------ | -------------- |
+      | 左上角 | `top-left`     |
+      | 正上方 | `top`          |
+      | 右上角 | `top-right`    |
+      | 正左边 | `left`         |
+      | 中间   | `center`       |
+      | 正右边 | `right`        |
+      | 左下角 | `bottom-left`  |
+      | 正下方 | `bottom`       |
+      | 右下角 | `bottom-right` |
+
+      <!-- @page-number -->
+      <!-- @top-title -->
+      <!-- @progress-bar: current=2, total=10 -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: slide -->
+
+      ## 📝 定义组件语法
+
+      <!-- step: fade -->
+
+      ```markdown
+      <!-- define: 组件名, position=位置 -->
+
+      组件内容，使用 {{参数}} 作为占位符
+
+      <!-- enddefine -->
+      ```
+
+      <!-- step: slide-up -->
+
+      **注意**：组件定义放在 Markdown 开头，无需 `---` 分隔
+
+      <!-- @page-number -->
+      <!-- @progress-bar: current=3, total=10 -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: slide -->
+
+      ## 📤 使用组件语法
+
+      <!-- step: fade -->
+
+      ```markdown
+      <!-- @组件名: 参数1=值1, 参数2=值2 -->
+      ```
+
+      <!-- step: fade -->
+
+      也可以在使用时覆盖位置：
+
+      ```markdown
+      <!-- @page-number: position=top-right -->
+      ```
+
+      <!-- @page-number -->
+      <!-- @chapter-nav: chapter=2 -->
+      <!-- @progress-bar: current=4, total=10 -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: zoom -->
+      <!-- theme: ocean -->
+
+      ## ⚡ 内置变量
+
+      <!-- step: fade -->
+
+      | 变量               | 说明               |
+      | ------------------ | ------------------ |
+      | `{{$slideNumber}}` | 当前页码 (1-based) |
+      | `{{$totalSlides}}` | 总页数             |
+      | `{{$slideIndex}}`  | 当前索引 (0-based) |
+
+      <!-- step: slide-up -->
+
+      这些变量会在每页**自动更新**！
+
+      <!-- @page-number -->
+      <!-- @chapter-nav: chapter=2 -->
+      <!-- @progress-bar: current=5, total=10 -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: flip -->
+      <!-- theme: sakura -->
+
+      ## 🔀 条件渲染
+
+      <!-- step: fade -->
+
+      ```markdown
+      {{#eq chapter 1}}👉 当前章节{{/eq}}
+      {{#neq chapter 1}}其他章节{{/neq}}
+      ```
+
+      <!-- step: slide-up -->
+
+      看左边的导航 👈 当前章节会高亮显示
+
+      <!-- @page-number -->
+      <!-- @chapter-nav: chapter=3 -->
+      <!-- @progress-bar: current=6, total=10 -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: slide -->
+
+      ## 🔁 循环渲染
+
+      <!-- step: fade -->
+
+      ```markdown
+      {{#repeat total}}●{{/repeat}}
+      ```
+
+      <!-- step: slide-up -->
+
+      看底部的进度条 👇 是用循环渲染的！
+
+      <!-- @page-number -->
+      <!-- @chapter-nav: chapter=3 -->
+      <!-- @progress-bar: current=7, total=10 -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: zoom -->
+      <!-- theme: sunset -->
+
+      ## 🎨 多组件组合
+
+      <!-- step: fade -->
+
+      一个页面可以同时使用多个组件
+
+      <!-- step: slide-up -->
+
+      - 👆 顶部：标题
+      - 👈 左侧：导航
+      - 👇 底部：进度条
+      - 👉 右下：页码
+
+      <!-- @top-title -->
+      <!-- @chapter-nav: chapter=4 -->
+      <!-- @progress-bar: current=8, total=10 -->
+      <!-- @page-number -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: slide -->
+
+      ## 🚀 实用场景
+
+      <!-- step: fade -->
+
+      - 📑 固定的页眉页脚
+      - 🧭 章节导航侧边栏
+      - 📊 进度指示器
+      - 👤 作者/讲师信息
+      - 🎯 当前章节标记
+
+      <!-- @page-number -->
+      <!-- @author-badge: name=Jae, role=全栈开发者 -->
+      <!-- @progress-bar: current=9, total=10 -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: fade -->
+      <!-- theme: matcha -->
+
+      # 🙏 感谢使用
+
+      <!-- step: fade -->
+
+      ### Matcha.js V8 - 组件化系统
+
+      <!-- step: slide-up -->
+
+      ✨ 固定位置 · 📍 9 个位置 · 🔄 参数传递 · 🎨 条件渲染
+
+      <!-- step: bounce -->
+
+      **让 PPT 开发更高效！**
+
+      <!-- @page-number -->
+      <!-- @progress-bar: current=10, total=10 -->
+    </script>
+
+    <script type="module">
+      import Matcha from "../matcha.js";
+
+      const app = new Matcha({
+        progressBar: {
+          visible: true,
+          color: "#00c853",
+          position: "bottom",
+        },
+        style: {
+          theme: "matcha",
+        },
+        transition: {
+          type: "fade",
+          duration: 700,
+        },
+        fragment: {
+          duration: 500,
+        },
+      });
+
+      app.start();
+      window.matcha = app;
+
+      // 演示：通过 JS API 注册组件
+      app.modules.component.register("badge", "🏷️ **{{text}}**", "top-right");
+
+      // 演示：设置全局变量
+      app.modules.component.setGlobalVars({
+        author: "Jae",
+        year: "2024",
+      });
+    </script>
+  </body>
+</html>

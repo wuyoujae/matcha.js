@@ -7,12 +7,15 @@
 ## 目录
 
 - [核心语法](#核心语法)
+- [组件系统 (component)](#组件系统-component) ✨ **V8 新增**
 - [布局模块 (layout)](#布局模块-layout)
 - [样式模块 (style)](#样式模块-style)
 - [过渡动画 (transition)](#过渡动画-transition)
 - [分步展示 (fragment)](#分步展示-fragment)
 - [高亮聚焦 (highlight)](#高亮聚焦-highlight)
 - [卡片容器 (card)](#卡片容器-card)
+- [媒体支持 (media)](#媒体支持-media)
+- [数学公式 (math)](#数学公式-math)
 - [Markdown 解析 (markdowmParse)](#markdown-解析-markdowmparse)
 - [进度条 (progressBar)](#进度条-progressbar)
 
@@ -44,6 +47,205 @@
 <!-- 指令名: 值 -->
 <!-- 指令名: 值1, 参数1=值, 参数2=值 -->
 ```
+
+---
+
+## 组件系统 (component)
+
+> 文件：`models/component.js` ✨ **V8 新增**
+
+组件系统让你可以**定义固定位置的可复用组件**，不随页面滚动，支持参数传递和条件渲染。
+
+### 核心特性
+
+- 🔒 **固定位置**：组件不随页面滚动，固定在屏幕边缘
+- 📍 **9 个位置**：支持左上、正上、右上、左、中、右、左下、正下、右下
+- 🔄 **自动更新**：内置变量在每页自动更新
+- 📦 **无需分隔**：组件定义区与第一页内容无需 `---` 分隔
+
+### 定义组件
+
+在 Markdown 开头使用 `<!-- define: 组件名, position=位置 -->` 定义组件：
+
+```markdown
+<!-- define: page-number, position=bottom-right -->
+
+📄 **{{$slideNumber}}** / {{$totalSlides}}
+
+<!-- enddefine -->
+```
+
+### 位置参数
+
+| 位置   | 参数值         | 说明   |
+| ------ | -------------- | ------ |
+| 左上角 | `top-left`     | ↖      |
+| 正上方 | `top`          | ↑      |
+| 右上角 | `top-right`    | ↗      |
+| 正左边 | `left`         | ←      |
+| 中间   | `center`       | ●      |
+| 正右边 | `right`        | →      |
+| 左下角 | `bottom-left`  | ↙      |
+| 正下方 | `bottom`       | ↓      |
+| 右下角 | `bottom-right` | ↘ 默认 |
+
+### 使用组件
+
+使用 `<!-- @组件名: 参数=值 -->` 调用组件：
+
+```markdown
+<!-- @page-number -->
+<!-- @chapter-nav: chapter=2 -->
+```
+
+### 覆盖位置
+
+使用时可以覆盖定义时的位置：
+
+```markdown
+<!-- @page-number: position=top-right -->
+```
+
+### 内置变量
+
+| 变量               | 说明               |
+| ------------------ | ------------------ |
+| `{{$slideNumber}}` | 当前页码 (1-based) |
+| `{{$totalSlides}}` | 总页数             |
+| `{{$slideIndex}}`  | 当前索引 (0-based) |
+
+```markdown
+<!-- define: page-number, position=bottom-right -->
+
+📄 **{{$slideNumber}}** / {{$totalSlides}}
+
+<!-- enddefine -->
+```
+
+### 条件渲染
+
+#### if 条件
+
+```markdown
+{{#if showTitle}}
+
+## 这是标题
+
+{{/if}}
+
+{{#if premium}}
+高级功能
+{{#else}}
+基础功能
+{{/if}}
+```
+
+#### 相等判断 (eq/neq)
+
+```markdown
+{{#eq chapter 1}}👉 当前章节{{/eq}}
+{{#neq chapter 1}}其他章节{{/neq}}
+```
+
+#### 数值比较 (gt/lt)
+
+```markdown
+{{#gt score 60}}及格{{/gt}}
+{{#lt score 60}}不及格{{/lt}}
+```
+
+### 循环渲染
+
+使用 `{{#repeat count}}...{{/repeat}}` 循环，循环内可用 `{{$i}}` (1-based) 和 `{{$i0}}` (0-based)：
+
+```markdown
+<!-- define: progress-dots -->
+
+{{#repeat total}}{{#eq $i current}}●{{/eq}}{{#neq $i current}}○{{/neq}} {{/repeat}}
+
+<!-- enddefine -->
+
+<!-- @progress-dots: current=3, total=5 -->
+```
+
+输出：`○ ○ ● ○ ○`
+
+### 实用组件示例
+
+#### 章节导航
+
+```markdown
+<!-- define: chapter-nav -->
+<!-- card: bg=glass -->
+
+### 📚 课程导航
+
+{{#eq chapter 1}}**👉 第一章**{{/eq}}{{#neq chapter 1}}第一章{{/neq}}
+{{#eq chapter 2}}**👉 第二章**{{/eq}}{{#neq chapter 2}}第二章{{/neq}}
+{{#eq chapter 3}}**👉 第三章**{{/eq}}{{#neq chapter 3}}第三章{{/neq}}
+
+<!-- endcard -->
+<!-- enddefine -->
+
+<!-- @chapter-nav: chapter=2 -->
+```
+
+#### 提示框
+
+```markdown
+<!-- define: tip-box -->
+<!-- card: bg=rgba(0,200,83,0.1), border=1px solid rgba(0,200,83,0.3) -->
+
+💡 **提示**：{{content}}
+
+<!-- endcard -->
+<!-- enddefine -->
+
+<!-- @tip-box: content=组件可以嵌套使用卡片模块 -->
+```
+
+#### 作者卡片
+
+```markdown
+<!-- define: author-card -->
+<!-- card: bg=glass, shadow=md -->
+
+### 👤 {{name}}
+
+**职位**：{{role}}
+{{#if company}}**公司**：{{company}}{{/if}}
+
+<!-- endcard -->
+<!-- enddefine -->
+
+<!-- @author-card: name=Jae, role=全栈开发者, company=独立开发 -->
+```
+
+### JavaScript 控制
+
+```javascript
+// 通过 JS 注册组件
+matcha.modules.component.register("badge", "🏷️ **{{text}}**");
+
+// 设置全局变量
+matcha.modules.component.setGlobalVars({
+  author: "Jae",
+  year: "2024",
+});
+
+// 检查组件是否存在
+matcha.modules.component.hasComponent("badge");
+
+// 获取所有已注册组件
+matcha.modules.component.getComponents();
+```
+
+### 注意事项
+
+1. **组件定义位置**：必须放在第一个 `---` 之前
+2. **参数名规则**：使用字母、数字和下划线，如 `chapter_1`
+3. **嵌套支持**：组件内可以使用卡片、布局等其他模块
+4. **递归限制**：暂不支持组件嵌套调用组件
 
 ---
 
@@ -558,6 +760,110 @@ matcha.modules.fragment.getStepState(slideIndex);
 
 ---
 
+## 媒体支持 (video, audio & iframe)
+
+> 文件：`models/video.js`, `models/audio.js`, `models/iframe.js`
+
+支持嵌入视频、音频和 Iframe 网页。
+
+### 视频 (Video)
+
+> 文件：`models/video.js`
+
+使用 `<!-- video -->` 指令嵌入视频：
+
+```markdown
+<!-- video: src=video.mp4, width=800px, controls=true -->
+```
+
+#### 可用参数
+
+| 参数       | 说明                    | 默认值  |
+| ---------- | ----------------------- | ------- |
+| `src`      | 视频地址 (必填)         | -       |
+| `width`    | 宽度                    | `100%`  |
+| `height`   | 高度                    | `auto`  |
+| `autoplay` | 自动播放 (true/false)   | `false` |
+| `loop`     | 循环播放 (true/false)   | `false` |
+| `muted`    | 静音 (true/false)       | `false` |
+| `controls` | 显示控制器 (true/false) | `true`  |
+
+### 音频 (Audio)
+
+> 文件：`models/audio.js`
+
+使用 `<!-- audio -->` 指令嵌入音频：
+
+```markdown
+<!-- audio: src=music.mp3, controls=true -->
+```
+
+#### 可用参数
+
+| 参数       | 说明                    | 默认值  |
+| ---------- | ----------------------- | ------- |
+| `src`      | 音频地址 (必填)         | -       |
+| `width`    | 宽度                    | `100%`  |
+| `autoplay` | 自动播放 (true/false)   | `false` |
+| `loop`     | 循环播放 (true/false)   | `false` |
+| `muted`    | 静音 (true/false)       | `false` |
+| `controls` | 显示控制器 (true/false) | `true`  |
+
+### Iframe
+
+> 文件：`models/iframe.js`
+
+使用 `<!-- iframe -->` 指令嵌入网页或在线工具：
+
+```markdown
+<!-- iframe: src=https://example.com, height=500px -->
+```
+
+#### 可用参数
+
+| 参数        | 说明                 | 默认值  |
+| ----------- | -------------------- | ------- |
+| `src`       | 网页地址 (必填)      | -       |
+| `width`     | 宽度                 | `100%`  |
+| `height`    | 高度                 | `400px` |
+| `scrolling` | 滚动条 (yes/no/auto) | `no`    |
+| `border`    | 边框                 | `0`     |
+
+---
+
+## 数学公式 (math)
+
+> 文件：`models/math.js`
+
+使用 **KaTeX** 渲染数学公式。
+
+### 基础语法
+
+#### 行内公式
+
+使用 `$` 包裹：
+
+```markdown
+质能方程 $E=mc^2$ 很著名。
+```
+
+#### 块级公式
+
+使用 `$$` 包裹：
+
+```markdown
+$$
+\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
+$$
+```
+
+### 注意事项
+
+- 公式中的特殊字符（如 `_`, `*`）会被自动保护，不会被 Markdown 解析器误处理。
+- 需要确保页面加载了 KaTeX 的 CSS 和 JS 文件（Matcha 会尝试自动加载，但推荐手动引入）。
+
+---
+
 ## Markdown 解析 (markdowmParse)
 
 > 文件：`models/markdowmParse.js`
@@ -673,12 +979,13 @@ matcha.modules.progressBar.setPosition("top");
 
 以下语法将在未来版本中支持：
 
-| 语法                             | 说明       |
-| -------------------------------- | ---------- |
-| `<!-- fragment -->`              | 分步显示   |
-| `<!-- notes: xxx -->`            | 演讲者备注 |
-| `<!-- transition: fade -->`      | 过渡动画   |
-| `<!-- background-video: url -->` | 视频背景   |
+| 语法                             | 说明       | 状态   |
+| -------------------------------- | ---------- | ------ |
+| `<!-- define: xxx -->`           | 组件定义   | ✅ V8  |
+| `<!-- @xxx: params -->`          | 组件使用   | ✅ V8  |
+| `<!-- notes: xxx -->`            | 演讲者备注 | 规划中 |
+| `<!-- background-video: url -->` | 视频背景   | 规划中 |
+| `<!-- timer: 5min -->`           | 演示计时器 | 规划中 |
 
 ---
 

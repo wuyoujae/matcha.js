@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Matcha V7 - 高亮聚焦演示</title>
     <link rel="stylesheet" href="matcha.css" />
+    <!-- KaTeX for Math support -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   </head>
   <body>
     <div id="matcha-stage"></div>
@@ -274,6 +280,73 @@
       自适应宽度，支持 Markdown 内容
 
       <!-- endcard -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: fade -->
+
+      ## 🧮 数学公式支持
+
+      行内公式：$E = mc^2$
+
+      <!-- step: fade -->
+
+      块级公式：
+
+      $$
+      f(x) = \int_{-\infty}^\infty \hat f(\xi)\,e^{2\pi i \xi x} \,d\xi
+      $$
+
+      <!-- step: slide-up -->
+
+      _Powered by KaTeX_
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: fade -->
+      <!-- theme: mono -->
+
+      ## 🎬 视频与嵌入
+
+      <!-- card: bg=#fff, shadow=md, width=800px -->
+
+      ### 本地视频
+
+      <!-- video: src=https://www.w3schools.com/html/mov_bbb.mp4, width=100%, height=350px -->
+
+      _Big Buck Bunny Demo_
+
+      <!-- endcard -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: slide -->
+
+      ## 🎵 音频支持
+
+      <!-- card: bg=#f5f5f5, shadow=sm, padding=20px -->
+
+      ### 背景音乐或旁白
+
+      <!-- audio: src=https://www.w3schools.com/html/horse.mp3, controls=true -->
+
+      _Horse Sound Demo_
+
+      <!-- endcard -->
+
+      ---
+
+      <!-- layout: center -->
+      <!-- transition: slide -->
+
+      ## 🌐 网页嵌入
+
+      <!-- iframe: src=https://matcha.mingslide.com, height=500px, border=1px solid #eee -->
+
+      直接嵌入在线内容
 
       ---
 

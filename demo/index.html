@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mingslide - Kinetic Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入更有艺术感的字体: Space Grotesk (几何感) 和 Inter -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              display: ["Space Grotesk", "sans-serif"],
+            },
+            colors: {
+              brand: {
+                green: "#00E076", // 更亮的荧光绿
+                dark: "#050A14",
+                purple: "#8B5CF6",
+                blue: "#3B82F6",
+                yellow: "#FBBF24",
+                pink: "#F472B6",
+              },
+            },
+            animation: {
+              blob: "blob 10s infinite",
+              "blob-reverse": "blob 12s infinite reverse",
+              "spin-slow": "spin 15s linear infinite",
+              "slide-up": "slideUp 0.8s ease-out forwards",
+            },
+            keyframes: {
+              blob: {
+                "0%": { transform: "translate(0px, 0px) scale(1)" },
+                "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+                "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+                "100%": { transform: "translate(0px, 0px) scale(1)" },
+              },
+              slideUp: {
+                "0%": { opacity: 0, transform: "translateY(40px)" },
+                "100%": { opacity: 1, transform: "translateY(0)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* 核心：噪点纹理 - 给页面增加高级质感 */
+      .noise-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 50;
+        opacity: 0.04;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+
+      /* 隐藏滚动条但保留功能 */
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+
+      /* 3D 卡片透视容器 */
+      .perspective-container {
+        perspective: 1000px;
+      }
+
+      /* 玻璃拟态增强 */
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+      }
+
+      .text-outline {
+        -webkit-text-stroke: 1px rgba(0, 0, 0, 0.1);
+        color: transparent;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-white text-brand-dark font-sans overflow-x-hidden relative selection:bg-brand-green selection:text-white"
+  >
+    <!-- 全局噪点层 -->
+    <div class="noise-bg"></div>
+
+    <!-- 动态背景 (Moving Mesh Gradient) -->
+    <div class="fixed inset-0 w-full h-full overflow-hidden -z-10">
+      <!-- 这里的颜色块会不停移动融合 -->
+      <div
+        class="absolute top-0 left-0 w-[50vw] h-[50vw] bg-brand-green/30 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob"
+      ></div>
+      <div
+        class="absolute top-0 right-0 w-[50vw] h-[50vw] bg-brand-purple/30 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob-reverse animation-delay-2000"
+      ></div>
+      <div
+        class="absolute -bottom-32 left-20 w-[60vw] h-[60vw] bg-brand-blue/30 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob animation-delay-4000"
+      ></div>
+      <div
+        class="absolute bottom-0 right-20 w-[40vw] h-[40vw] bg-brand-yellow/30 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob-reverse"
+      ></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-40 transition-all duration-300 py-6">
+      <div class="max-w-7xl mx-auto px-6">
+        <div
+          class="glass-panel rounded-full px-6 py-3 flex justify-between items-center transition-transform hover:scale-[1.01] duration-500"
+        >
+          <!-- Logo -->
+          <div class="flex items-center gap-3 group cursor-pointer">
+            <div class="relative w-8 h-8">
+              <div
+                class="absolute inset-0 bg-brand-green rounded-lg rotate-0 group-hover:rotate-45 transition-transform duration-500 ease-out"
+              ></div>
+              <div
+                class="absolute inset-0 bg-brand-blue rounded-lg rotate-0 opacity-0 group-hover:opacity-100 group-hover:-rotate-12 transition-all duration-500 ease-out mix-blend-multiply"
+              ></div>
+            </div>
+            <span class="font-display font-bold text-xl tracking-tight"
+              >Ming<span class="text-brand-purple">slide</span>.</span
+            >
+          </div>
+
+          <!-- Menu -->
+          <div
+            class="hidden md:flex items-center gap-8 font-medium text-sm text-gray-600"
+          >
+            <a href="#" class="hover:text-brand-green transition-colors"
+              >Products</a
+            >
+            <a href="#" class="hover:text-brand-purple transition-colors"
+              >Showcase</a
+            >
+            <a href="#" class="hover:text-brand-blue transition-colors"
+              >Pricing</a
+            >
+          </div>
+
+          <!-- CTA -->
+          <button
+            class="bg-brand-dark text-white px-6 py-2 rounded-full font-medium text-sm hover:bg-brand-green hover:text-brand-dark transition-all duration-300 shadow-lg shadow-brand-green/20"
+          >
+            Get Access
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main
+      class="min-h-screen flex flex-col justify-center items-center px-4 pt-20 relative perspective-container"
+    >
+      <!-- 悬浮装饰物 (3D Floating Elements) -->
+      <div
+        class="absolute left-[10%] top-[20%] w-16 h-16 bg-gradient-to-br from-brand-yellow to-orange-400 rounded-2xl rotate-12 shadow-2xl animate-blob opacity-80"
+        style="animation-delay: 1s"
+      ></div>
+      <div
+        class="absolute right-[15%] bottom-[20%] w-24 h-24 bg-gradient-to-tr from-brand-purple to-pink-500 rounded-full shadow-2xl animate-blob-reverse opacity-80"
+      ></div>
+
+      <!-- Main Content -->
+      <div class="text-center z-10 max-w-5xl mx-auto mt-10">
+        <!-- 胶囊标签 -->
+        <div
+          class="inline-block mb-6 animate-slide-up"
+          style="animation-delay: 0.1s"
+        >
+          <div
+            class="px-4 py-1.5 rounded-full border border-gray-900/10 bg-white/40 backdrop-blur-md flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-white/60 transition-colors cursor-pointer"
+          >
+            <span
+              class="w-2 h-2 rounded-full bg-brand-green animate-pulse"
+            ></span>
+            <span>The Future of Design is Here</span>
+          </div>
+        </div>
+
+        <!-- 超大标题 -->
+        <h1
+          class="font-display font-bold text-6xl md:text-8xl lg:text-9xl leading-[0.9] tracking-tighter mb-8 animate-slide-up text-brand-dark"
+          style="animation-delay: 0.2s"
+        >
+          Design <br />
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-brand-green via-brand-blue to-brand-purple bg-[length:200%_auto] animate-[pulse_4s_ease-in-out_infinite]"
+            >Without</span
+          >
+          <br />
+          <span class="italic font-serif font-light text-gray-800"
+            >Limits.</span
+          >
+        </h1>
+
+        <p
+          class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up"
+          style="animation-delay: 0.3s"
+        >
+          Mingslide is an acid-pop design system built for the bold.
+          <span class="text-brand-dark font-semibold"
+            >五彩斑斓，生动不息。</span
+          >
+        </p>
+
+        <!-- 按钮组 -->
+        <div
+          class="flex flex-col sm:flex-row justify-center gap-5 animate-slide-up"
+          style="animation-delay: 0.4s"
+        >
+          <button
+            class="group relative px-8 py-4 bg-brand-dark text-white rounded-full font-bold text-lg overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-xl shadow-brand-dark/20"
+          >
+            <span
+              class="relative z-10 group-hover:text-brand-green transition-colors"
+              >Start Creating</span
+            >
+            <div
+              class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"
+            ></div>
+          </button>
+          <button
+            class="px-8 py-4 bg-white/50 backdrop-blur-sm border border-white/60 text-brand-dark rounded-full font-bold text-lg hover:bg-white transition-all hover:shadow-lg hover:-translate-y-1"
+          >
+            Watch Demo
+          </button>
+        </div>
+      </div>
+
+      <!-- 3D Card Showcase (Tilt Effect) -->
+      <div
+        class="mt-20 w-full max-w-4xl mx-auto animate-slide-up"
+        style="animation-delay: 0.6s"
+      >
+        <div
+          id="tilt-card"
+          class="glass-panel rounded-3xl p-2 md:p-4 transform transition-transform duration-100 ease-linear shadow-2xl"
+        >
+          <div
+            class="bg-gray-50 rounded-2xl overflow-hidden aspect-[16/9] relative group"
+          >
+            <!-- 模拟UI界面 -->
+            <div
+              class="absolute top-4 left-4 right-4 h-8 bg-white rounded-lg shadow-sm flex items-center px-3 gap-2"
+            >
+              <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+            </div>
+            <!-- 内部内容 -->
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div
+                class="text-4xl md:text-6xl font-display font-bold text-gray-200 group-hover:text-brand-green/20 transition-colors duration-500"
+              >
+                MINGSLIDE UI
+              </div>
+            </div>
+            <!-- 悬浮的彩色圆球 -->
+            <div
+              class="absolute bottom-10 right-10 w-32 h-32 bg-brand-pink/40 blur-2xl rounded-full mix-blend-multiply animate-blob"
+            ></div>
+            <div
+              class="absolute top-20 left-20 w-40 h-40 bg-brand-blue/40 blur-2xl rounded-full mix-blend-multiply animate-blob-reverse"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bento Grid Section -->
+    <section class="py-32 px-4 max-w-7xl mx-auto">
+      <div class="flex items-end justify-between mb-16">
+        <h2 class="text-5xl md:text-7xl font-display font-bold leading-none">
+          Super <br />
+          <span class="text-brand-purple">Features</span>
+        </h2>
+        <p class="hidden md:block text-gray-500 max-w-xs text-right">
+          Everything you need to build the next unicorn, painted in Technicolor.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
+        <!-- Card 1: Large -->
+        <div
+          class="md:col-span-2 glass-panel rounded-3xl p-8 relative overflow-hidden group hover:shadow-brand-green/20 transition-all duration-500"
+        >
+          <div
+            class="absolute top-0 right-0 w-64 h-64 bg-brand-green/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-brand-green/30 transition-all"
+          ></div>
+          <h3 class="text-3xl font-bold mb-2 relative z-10">
+            Elastic Animations
+          </h3>
+          <p class="text-gray-600 relative z-10 max-w-sm">
+            Built-in physics based animations that feel natural and organic.
+            Just add the class and watch it bounce.
+          </p>
+          <div
+            class="absolute bottom-8 right-8 text-9xl font-display font-bold text-outline opacity-20 rotate-[-10deg] group-hover:rotate-0 transition-transform duration-500"
+          >
+            Aa
+          </div>
+        </div>
+
+        <!-- Card 2: Tall -->
+        <div
+          class="md:row-span-2 glass-panel rounded-3xl p-8 relative overflow-hidden group hover:shadow-brand-purple/20 transition-all duration-500 bg-brand-dark text-white"
+        >
+          <div
+            class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-brand-purple/50 to-transparent opacity-50 group-hover:opacity-80 transition-opacity"
+          ></div>
+          <h3 class="text-3xl font-bold mb-2">Dark Mode</h3>
+          <p class="text-gray-400">Included out of the box.</p>
+          <div class="mt-10 flex flex-col gap-4">
+            <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div class="w-2/3 h-full bg-brand-green animate-pulse"></div>
+            </div>
+            <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div
+                class="w-1/2 h-full bg-brand-pink animate-pulse"
+                style="animation-delay: 0.5s"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Small -->
+        <div
+          class="glass-panel rounded-3xl p-8 flex flex-col justify-center items-center text-center group hover:-translate-y-2 transition-transform duration-300"
+        >
+          <div
+            class="w-16 h-16 rounded-2xl bg-brand-yellow/20 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform"
+          >
+            ⚡️
+          </div>
+          <h3 class="text-xl font-bold">Lightning Fast</h3>
+        </div>
+
+        <!-- Card 4: Small -->
+        <div
+          class="glass-panel rounded-3xl p-8 flex flex-col justify-center items-center text-center group hover:-translate-y-2 transition-transform duration-300"
+        >
+          <div
+            class="w-16 h-16 rounded-2xl bg-brand-pink/20 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform"
+          >
+            🎨
+          </div>
+          <h3 class="text-xl font-bold">Auto Palette</h3>
+        </div>
+      </div>
+    </section>
+
+    <footer class="py-20 text-center relative overflow-hidden">
+      <h2
+        class="text-[12vw] font-display font-bold text-gray-100 select-none pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap"
+      >
+        MINGSLIDE
+      </h2>
+      <div class="relative z-10">
+        <p class="text-gray-500 font-medium mb-8">
+          © 2024 Mingslide Design System.
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      // 简单的 3D Tilt 效果脚本
+      const card = document.getElementById("tilt-card");
+      const container = card.parentElement;
+
+      container.addEventListener("mousemove", (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // 计算中心点
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        // 计算旋转角度 (限制在 +/- 10deg)
+        const rotateX = ((y - centerY) / centerY) * -5;
+        const rotateY = ((x - centerX) / centerX) * 5;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+
+      container.addEventListener("mouseleave", () => {
+        card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+      });
+
+      // 滚动动画 (Intersection Observer)
+      const observerOptions = {
+        threshold: 0.1,
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("animate-slide-up");
+            entry.target.style.opacity = "1";
+          }
+        });
+      }, observerOptions);
+
+      // 选择所有卡片应用滚动动画
+      document.querySelectorAll(".glass-panel").forEach((el) => {
+        el.style.opacity = "0"; // 初始隐藏
+        observer.observe(el);
+      });
+    </script>
+  </body>
+</html>

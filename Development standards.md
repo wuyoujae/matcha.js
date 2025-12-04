@@ -80,7 +80,7 @@ window.MatchaModuleName = ModuleName; // 全局挂载（兼容无构建工具场
 
 | 类型     | 目录       | 说明         | 示例                                    |
 | -------- | ---------- | ------------ | --------------------------------------- |
-| 核心模块 | `models/`  | 框架基础功能 | `markdowmParse.js`, `progressBar.js`    |
+| 核心模块 | `models/`  | 框架基础功能 | `markdowmParse.js`, `component.js`      |
 | 插件模块 | `plugins/` | 可选增强功能 | `code-highlight.js`, `speaker-notes.js` |
 | 主题模块 | `themes/`  | 样式主题     | `dark.css`, `minimal.css`               |
 
@@ -238,6 +238,7 @@ matcha/
 │   ├── progressBar.js    # 进度条模块
 │   ├── style.js          # 主题样式模块
 │   ├── layout.js         # 布局系统模块
+│   ├── component.js      # 组件化系统模块 ✨ V8 新增
 │   │
 │   └── complexModule/    # 复杂模块示例（文件夹形式）
 │       ├── index.js      # 入口文件

@@ -1,4 +1,4 @@
-/* matcha.js - V7 Per-slide Config & Fragment Support with Highlight */
+/* matcha.js - V8 Component System & Per-slide Config */
 import MarkdowmParse from "./models/markdowmParse.js";
 import ProgressBar from "./models/progressBar.js";
 import Style from "./models/style.js";
@@ -7,6 +7,11 @@ import Transition from "./models/transition.js";
 import Fragment from "./models/fragment.js";
 import Highlight from "./models/highlight.js";
 import Card from "./models/card.js";
+import Video from "./models/video.js";
+import Audio from "./models/audio.js";
+import Iframe from "./models/iframe.js";
+import MathSupport from "./models/math.js";
+import Component from "./models/component.js";
 
 class Matcha {
   constructor(config = {}) {
@@ -21,8 +26,14 @@ class Matcha {
       fragment: config.fragment || {},
       highlight: config.highlight || {},
       card: config.card || {},
+      video: config.video || {},
+      audio: config.audio || {},
+      iframe: config.iframe || {},
+      math: config.math || {},
+      component: config.component || {},
     };
     this.slidesElements = [];
+    this.slideComponentUsages = []; // 每个幻灯片的组件使用信息
     this.currentSlideIndex = 0;
     this.modules = {};
     this._initModules();
@@ -39,6 +50,11 @@ class Matcha {
     this.modules.fragment = new Fragment(this.config.fragment);
     this.modules.highlight = new Highlight(this.config.highlight);
     this.modules.card = new Card(this.config.card);
+    this.modules.video = new Video(this.config.video);
+    this.modules.audio = new Audio(this.config.audio);
+    this.modules.iframe = new Iframe(this.config.iframe);
+    this.modules.math = new MathSupport(this.config.math);
+    this.modules.component = new Component(this.config.component);
   }
 
   use(module, options = {}) {
@@ -64,6 +80,11 @@ class Matcha {
     this.modules.fragment.init(this);
     this.modules.highlight.init(this);
     this.modules.card.init(this);
+    this.modules.video.init(this);
+    this.modules.audio.init(this);
+    this.modules.iframe.init(this);
+    this.modules.math.init(this);
+    this.modules.component.init(this);
 
     const rawMarkdown = scriptTag.textContent;
     this.parseAndBuild(rawMarkdown);
@@ -76,16 +97,29 @@ class Matcha {
   parseAndBuild(markdown) {
     const stage = document.getElementById(this.config.containerId);
     stage.innerHTML = "";
+    this.slideComponentUsages = [];
 
-    const slideBlocks = markdown.split(/^\s*---\s*$/gm);
+    // 0. 组件系统：首先提取所有组件定义
+    const markdownWithoutDefines =
+      this.modules.component.extractDefinitions(markdown);
+
+    const slideBlocks = markdownWithoutDefines.split(/^\s*---\s*$/gm);
+    const totalSlides = slideBlocks.filter((b) => b.trim()).length;
     let slideIndex = 0;
 
     slideBlocks.forEach((block) => {
       if (!block.trim()) return;
 
+      // 0.5. 组件系统：处理当前幻灯片中的组件使用，提取组件信息
+      const { cleanContent, componentUsages } =
+        this.modules.component.processSlide(block, slideIndex, totalSlides);
+
+      // 存储该幻灯片的组件使用信息
+      this.slideComponentUsages.push(componentUsages);
+
       // 1. 解析过渡指令
       const { cleanBlock: afterTransition, transitionConfig } =
-        this.modules.transition.parseTransitionDirective(block);
+        this.modules.transition.parseTransitionDirective(cleanContent);
 
       // 2. 解析样式/主题指令
       const {
@@ -105,14 +139,22 @@ class Matcha {
         layoutType,
         layoutParams,
         (text) => {
+          // 0. Math Preprocess: 提取公式防止被 Markdown 破坏
+          const mathCleaned = this.modules.math.preprocess(text);
+
           // 使用 fragment 模块解析并渲染（在 Markdown 渲染之前处理 step 标记）
           return this.modules.fragment.parseAndRender(
-            text,
+            mathCleaned,
             currentSlideIndex,
             (content) => {
-              // 先处理卡片，再处理 Markdown
+              // 先处理卡片，再处理视频/音频/Iframe，最后处理 Markdown
               const cardContent = this.modules.card.parse(content);
-              return this.modules.markdowmParse.parse(cardContent);
+              const videoContent = this.modules.video.parse(cardContent);
+              const audioContent = this.modules.audio.parse(videoContent);
+              const iframeContent = this.modules.iframe.parse(audioContent);
+              const html = this.modules.markdowmParse.parse(iframeContent);
+              // Math Postprocess: 还原并渲染公式
+              return this.modules.math.postprocess(html);
             }
           );
         }
@@ -162,6 +204,14 @@ class Matcha {
     } else {
       this.modules.fragment.showAllSteps(index);
     }
+
+    // 渲染当前幻灯片的组件（固定位置）
+    const usages = this.slideComponentUsages[index] || [];
+    this.modules.component.renderComponents(
+      index,
+      this.slidesElements.length,
+      usages
+    );
 
     this.modules.progressBar.update(index, this.slidesElements.length);
   }

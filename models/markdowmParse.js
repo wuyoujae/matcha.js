@@ -56,7 +56,9 @@ class MarkdowmParse {
       html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
         const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
         codeBlocks.push(
-          `<pre><code class="language-${lang || "text"}">${this._escapeHtml(code.trim())}</code></pre>`
+          `<pre><code class="language-${lang || "text"}">${this._escapeHtml(
+            code.trim()
+          )}</code></pre>`
         );
         return placeholder;
       });

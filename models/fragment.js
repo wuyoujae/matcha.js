@@ -347,6 +347,7 @@ class Fragment {
 
     // 情况1：当前步骤还有未显示的高亮
     if (state.currentHighlight < highlightsInCurrentStep) {
+      const isSwitching = state.currentHighlight > 0; // 如果已经是 > 0，说明正在从上一个高亮切过来
       state.currentHighlight++;
       state.currentMicroStep++;
 
@@ -355,7 +356,8 @@ class Fragment {
       if (highlights[state.currentHighlight - 1]) {
         this._activateHighlight(
           state.slideElement,
-          highlights[state.currentHighlight - 1]
+          highlights[state.currentHighlight - 1],
+          isSwitching
         );
       }
 
@@ -410,7 +412,8 @@ class Fragment {
         const highlights = currentBlock.querySelectorAll(".matcha-highlight");
         this._activateHighlight(
           state.slideElement,
-          highlights[state.currentHighlight - 1]
+          highlights[state.currentHighlight - 1],
+          true // isSwitching = true
         );
       } else {
         // 没有高亮了，清除聚焦模式
@@ -453,17 +456,41 @@ class Fragment {
    * 激活高亮元素（使用遮罩层方式）
    * @private
    */
-  _activateHighlight(slideElement, highlightElement) {
+  _activateHighlight(slideElement, highlightElement, isSwitching = false) {
     // 开启聚焦模式（添加遮罩层）
     slideElement.classList.add("highlight-focus-mode");
 
+    const oldHighlights = slideElement.querySelectorAll(".highlight-active");
+
+    if (isSwitching) {
+      // 如果是切换，先给旧的和新的都加上无过渡类，防止淡入淡出导致的闪烁
+      oldHighlights.forEach((el) => el.classList.add("no-transition"));
+      highlightElement.classList.add("no-transition");
+
+      // 强制重排，确保 class 生效
+      // eslint-disable-next-line no-unused-expressions
+      highlightElement.offsetHeight;
+    }
+
     // 清除之前的高亮
-    slideElement.querySelectorAll(".highlight-active").forEach((el) => {
+    oldHighlights.forEach((el) => {
       el.classList.remove("highlight-active");
     });
 
     // 激活当前高亮（浮在遮罩层之上）
     highlightElement.classList.add("highlight-active");
+
+    if (isSwitching) {
+      // 强制重排，确保 active 切换完成
+      // eslint-disable-next-line no-unused-expressions
+      highlightElement.offsetHeight;
+
+      // 移除无过渡类
+      requestAnimationFrame(() => {
+        oldHighlights.forEach((el) => el.classList.remove("no-transition"));
+        highlightElement.classList.remove("no-transition");
+      });
+    }
   }
 
   /**

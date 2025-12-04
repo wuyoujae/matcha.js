@@ -12,6 +12,7 @@
 - [过渡动画 (transition)](#过渡动画-transition)
 - [分步展示 (fragment)](#分步展示-fragment)
 - [高亮聚焦 (highlight)](#高亮聚焦-highlight)
+- [卡片容器 (card)](#卡片容器-card)
 - [Markdown 解析 (markdowmParse)](#markdown-解析-markdowmparse)
 - [进度条 (progressBar)](#进度条-progressbar)
 
@@ -480,6 +481,79 @@ matcha.modules.highlight.setDimOpacity(0.15);
 // 获取分步状态（包含高亮信息）
 matcha.modules.fragment.getStepState(slideIndex);
 // { current: 2, total: 3, highlight: 1, microStep: 4, totalMicroSteps: 8 }
+```
+
+---
+
+## 卡片容器 (card)
+
+> 文件：`models/card.js`
+
+使用卡片容器包裹内容，支持自定义背景、边框和阴影，让页面布局更丰富。
+
+### 基础语法
+
+使用 `<!-- card -->` 开始，`<!-- endcard -->` 结束（可选）：
+
+```markdown
+<!-- card -->
+
+### 卡片标题
+
+这里是卡片内容，可以使用 **Markdown**
+
+<!-- endcard -->
+```
+
+如果省略 `<!-- endcard -->`，卡片会自动包裹直到下一个分隔符（如 `---` 或 `+++`）或文件结束。
+
+### 自定义样式
+
+```markdown
+<!-- card: bg=#fff, shadow=lg, radius=20px -->
+```
+
+### 可用参数
+
+| 参数      | 说明        | 示例                                                |
+| --------- | ----------- | --------------------------------------------------- |
+| `bg`      | 背景色/图片 | `#fff`, `linear-gradient(...)`, `url(...)`, `glass` |
+| `color`   | 文字颜色    | `#333`, `black`                                     |
+| `border`  | 边框        | `1px solid red`                                     |
+| `radius`  | 圆角        | `16px` (默认)                                       |
+| `shadow`  | 阴影        | `sm`, `md`, `lg`, `none`                            |
+| `padding` | 内边距      | `30px` (默认)                                       |
+| `width`   | 宽度        | `500px`, `80%`                                      |
+| `align`   | 文本对齐    | `left`, `center`, `right`                           |
+
+### 玻璃拟态 (Glassmorphism)
+
+使用 `bg=glass` 快速开启磨砂玻璃效果：
+
+```markdown
+<!-- card: bg=glass -->
+
+# Glass Card
+```
+
+### 完整示例
+
+```markdown
+<!-- layout: cols -->
+
+<!-- card: bg=#fff, color=#333, shadow=lg -->
+
+### 白底卡片
+
+内容...
+
++++
+
+<!-- card: bg=glass, border=1px solid rgba(255,255,255,0.2) -->
+
+### 玻璃卡片
+
+内容...
 ```
 
 ---

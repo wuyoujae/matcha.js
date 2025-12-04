@@ -275,3 +275,8 @@ hr {
   z-index: 10;
   box-shadow: 0 0 0 100vmax rgba(0, 0, 0, var(--mask-opacity));
 }
+
+/* 工具类：禁用过渡（用于多高亮切换时防止闪烁） */
+.matcha-highlight.no-transition {
+  transition: none !important;
+}

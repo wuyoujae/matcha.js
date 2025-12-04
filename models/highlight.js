@@ -52,9 +52,11 @@ class Highlight {
 
 /* 高亮容器包裹 */
 .matcha-highlight {
-  display: inline;
+  display: inline-block;
   position: relative;
-  transition: all var(--highlight-duration, ${this.options.duration}ms) var(--highlight-easing, ${this.options.easing});
+  transition: box-shadow var(--highlight-duration, ${this.options.duration}ms) var(--highlight-easing, ${this.options.easing});
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0);
+  border-radius: 4px;
 }
 
 /* 聚焦模式下的幻灯片 */
@@ -74,8 +76,6 @@ class Highlight {
   position: relative;
   z-index: 10;
   box-shadow: 0 0 0 100vmax rgba(0, 0, 0, var(--mask-opacity));
-  border-radius: 4px;
-  pointer-events: auto;
 }
     `;
     document.head.appendChild(this.styleElement);

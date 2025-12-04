@@ -17,7 +17,8 @@ class Fragment {
       duration: 500,
       easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
       // 高亮相关配置 - 使用 <内容> 语法
-      highlightPattern: /<([^<>\/][^<>]*)>/g,
+      // 使用负向前瞻排除闭合标签 (/) 和 HTML 注释 (!--)，但允许图片 (![)
+      highlightPattern: /<(?!\/|!--)([^<>]+)>/g,
       ...options,
     };
 

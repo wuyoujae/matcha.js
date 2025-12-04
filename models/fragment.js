@@ -450,11 +450,11 @@ class Fragment {
   }
 
   /**
-   * 激活高亮元素
+   * 激活高亮元素（使用遮罩层方式）
    * @private
    */
   _activateHighlight(slideElement, highlightElement) {
-    // 开启聚焦模式
+    // 开启聚焦模式（添加遮罩层）
     slideElement.classList.add("highlight-focus-mode");
 
     // 清除之前的高亮
@@ -462,20 +462,8 @@ class Fragment {
       el.classList.remove("highlight-active");
     });
 
-    // 清除父级标记
-    slideElement.querySelectorAll(".highlight-has-active").forEach((el) => {
-      el.classList.remove("highlight-has-active");
-    });
-
-    // 激活当前高亮
+    // 激活当前高亮（浮在遮罩层之上）
     highlightElement.classList.add("highlight-active");
-
-    // 标记所有祖先元素
-    let parent = highlightElement.parentElement;
-    while (parent && !parent.classList.contains("matcha-slide")) {
-      parent.classList.add("highlight-has-active");
-      parent = parent.parentElement;
-    }
   }
 
   /**
@@ -485,14 +473,12 @@ class Fragment {
   _clearHighlightFocus(slideElement) {
     if (!slideElement) return;
 
+    // 移除遮罩层
     slideElement.classList.remove("highlight-focus-mode");
 
+    // 清除所有高亮标记
     slideElement.querySelectorAll(".highlight-active").forEach((el) => {
       el.classList.remove("highlight-active");
-    });
-
-    slideElement.querySelectorAll(".highlight-has-active").forEach((el) => {
-      el.classList.remove("highlight-has-active");
     });
   }
 

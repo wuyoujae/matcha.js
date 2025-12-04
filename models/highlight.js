@@ -48,64 +48,37 @@ class Highlight {
     this.styleElement = document.createElement("style");
     this.styleElement.id = "matcha-highlight-module";
     this.styleElement.textContent = `
-/* Matcha Highlight Module - 聚焦高亮效果 */
+/* Matcha Highlight Module - 遮罩层高亮效果 */
 
 /* 高亮容器包裹 */
 .matcha-highlight {
   display: inline;
   position: relative;
-  transition: opacity var(--highlight-duration, ${this.options.duration}ms) var(--highlight-easing, ${this.options.easing});
+  transition: all var(--highlight-duration, ${this.options.duration}ms) var(--highlight-easing, ${this.options.easing});
 }
 
 /* 聚焦模式下的幻灯片 */
 .matcha-slide.highlight-focus-mode {
-  /* 使用 CSS 变量控制透明度 */
   --dim-opacity: ${this.options.dimOpacity};
+  --highlight-duration: ${this.options.duration}ms;
+  --highlight-easing: ${this.options.easing};
 }
 
-/* 聚焦模式下，所有内容变暗 */
-.matcha-slide.highlight-focus-mode .matcha-step-block,
-.matcha-slide.highlight-focus-mode .matcha-col,
-.matcha-slide.highlight-focus-mode .matcha-row,
-.matcha-slide.highlight-focus-mode .matcha-grid-cell,
-.matcha-slide.highlight-focus-mode > h1,
-.matcha-slide.highlight-focus-mode > h2,
-.matcha-slide.highlight-focus-mode > h3,
-.matcha-slide.highlight-focus-mode > p,
-.matcha-slide.highlight-focus-mode > ul,
-.matcha-slide.highlight-focus-mode > blockquote,
-.matcha-slide.highlight-focus-mode > pre,
-.matcha-slide.highlight-focus-mode > table {
-  opacity: var(--dim-opacity);
-  transition: opacity var(--highlight-duration, ${this.options.duration}ms) var(--highlight-easing, ${this.options.easing});
+/* 聚焦模式下使用遮罩层覆盖整个幻灯片 */
+.matcha-slide.highlight-focus-mode::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, var(--dim-opacity));
+  z-index: 5;
+  pointer-events: none;
+  transition: background var(--highlight-duration) var(--highlight-easing);
 }
 
-/* 高亮元素保持完全不透明 - 使用多层选择器确保覆盖 */
+/* 高亮元素浮在遮罩层之上 */
 .matcha-slide.highlight-focus-mode .matcha-highlight.highlight-active {
-  opacity: 1 !important;
   position: relative;
   z-index: 10;
-}
-
-/* 高亮元素的父容器也需要保持可见，但内部其他内容变暗 */
-.matcha-slide.highlight-focus-mode .highlight-has-active {
-  opacity: 1 !important;
-}
-
-/* 高亮元素的直接父级保持不透明，但其他兄弟元素变暗 */
-.matcha-slide.highlight-focus-mode .highlight-has-active > *:not(.highlight-active):not(.highlight-has-active) {
-  opacity: var(--dim-opacity);
-}
-
-/* 确保高亮元素本身内容完全可见 */
-.matcha-highlight.highlight-active,
-.matcha-highlight.highlight-active * {
-  opacity: 1 !important;
-}
-
-/* 可选：给高亮内容添加微妙的发光效果 */
-.matcha-slide.highlight-focus-mode .matcha-highlight.highlight-active {
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
     `;
     document.head.appendChild(this.styleElement);

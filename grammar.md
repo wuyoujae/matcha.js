@@ -172,60 +172,61 @@
 
 ### 实用组件示例
 
-#### 章节导航
+#### 章节导航（左侧固定）
 
 ```markdown
-<!-- define: chapter-nav -->
-<!-- card: bg=glass -->
+<!-- define: chapter-nav, position=left -->
 
-### 📚 课程导航
+{{#eq chapter 1}}**👉 介绍**{{/eq}}{{#neq chapter 1}}介绍{{/neq}}
+{{#eq chapter 2}}**👉 语法**{{/eq}}{{#neq chapter 2}}语法{{/neq}}
+{{#eq chapter 3}}**👉 进阶**{{/eq}}{{#neq chapter 3}}进阶{{/neq}}
 
-{{#eq chapter 1}}**👉 第一章**{{/eq}}{{#neq chapter 1}}第一章{{/neq}}
-{{#eq chapter 2}}**👉 第二章**{{/eq}}{{#neq chapter 2}}第二章{{/neq}}
-{{#eq chapter 3}}**👉 第三章**{{/eq}}{{#neq chapter 3}}第三章{{/neq}}
-
-<!-- endcard -->
 <!-- enddefine -->
 
 <!-- @chapter-nav: chapter=2 -->
 ```
 
-#### 提示框
+#### 进度条（底部固定）
 
 ```markdown
-<!-- define: tip-box -->
-<!-- card: bg=rgba(0,200,83,0.1), border=1px solid rgba(0,200,83,0.3) -->
+<!-- define: progress-bar, position=bottom -->
 
-💡 **提示**：{{content}}
+{{#repeat total}}{{#eq $i current}}●{{/eq}}{{#neq $i current}}○{{/neq}} {{/repeat}}
 
-<!-- endcard -->
 <!-- enddefine -->
 
-<!-- @tip-box: content=组件可以嵌套使用卡片模块 -->
+<!-- @progress-bar: current=3, total=10 -->
 ```
 
-#### 作者卡片
+#### 顶部标题
 
 ```markdown
-<!-- define: author-card -->
-<!-- card: bg=glass, shadow=md -->
+<!-- define: top-title, position=top -->
 
-### 👤 {{name}}
+🍵 **Matcha V8** - {{subtitle}}
 
-**职位**：{{role}}
-{{#if company}}**公司**：{{company}}{{/if}}
-
-<!-- endcard -->
 <!-- enddefine -->
 
-<!-- @author-card: name=Jae, role=全栈开发者, company=独立开发 -->
+<!-- @top-title: subtitle=组件化系统 -->
+```
+
+#### 作者信息（左下角）
+
+```markdown
+<!-- define: author-badge, position=bottom-left -->
+
+👤 {{name}} · {{role}}
+
+<!-- enddefine -->
+
+<!-- @author-badge: name=Jae, role=全栈开发者 -->
 ```
 
 ### JavaScript 控制
 
 ```javascript
-// 通过 JS 注册组件
-matcha.modules.component.register("badge", "🏷️ **{{text}}**");
+// 通过 JS 注册组件（第三个参数是位置）
+matcha.modules.component.register("badge", "🏷️ **{{text}}**", "top-right");
 
 // 设置全局变量
 matcha.modules.component.setGlobalVars({
@@ -242,10 +243,11 @@ matcha.modules.component.getComponents();
 
 ### 注意事项
 
-1. **组件定义位置**：必须放在第一个 `---` 之前
-2. **参数名规则**：使用字母、数字和下划线，如 `chapter_1`
-3. **嵌套支持**：组件内可以使用卡片、布局等其他模块
-4. **递归限制**：暂不支持组件嵌套调用组件
+1. **固定定位**：组件是 `position: fixed`，不随页面滚动
+2. **组件定义位置**：放在 Markdown 开头，无需 `---` 分隔
+3. **参数名规则**：使用字母、数字、下划线和短横线
+4. **位置覆盖**：使用时可以用 `position=xxx` 覆盖定义时的位置
+5. **多组件支持**：一个页面可以同时使用多个组件
 
 ---
 

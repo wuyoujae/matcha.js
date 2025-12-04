@@ -1,0 +1,216 @@
+/**
+ * @module highlight
+ * @description 高亮内容模块 - 聚焦展示内容，与分步系统深度集成
+ * @version 1.0.0
+ *
+ * @syntax
+ * 高亮语法（使用双等号包围内容）:
+ *   ==需要高亮的内容==
+ *
+ * 示例:
+ *   你好，这里是==Matcha==
+ *   我叫==jae==，我是一名==全栈==独立==开发者==
+ *
+ * 同一步中的多个高亮会按顺序逐个展示，形成嵌套分步效果
+ */
+class Highlight {
+  constructor(options = {}) {
+    this.options = {
+      // 非高亮区域的透明度
+      dimOpacity: 0.2,
+      // 高亮动画时长
+      duration: 400,
+      // 缓动函数
+      easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+      // 高亮标记正则
+      pattern: /==([^=]+)==/g,
+      ...options,
+    };
+
+    this.matcha = null;
+    this.styleElement = null;
+  }
+
+  /**
+   * 初始化模块
+   * @param {Matcha} matcha - Matcha 实例引用
+   */
+  init(matcha) {
+    this.matcha = matcha;
+    this._injectStyles();
+  }
+
+  /**
+   * 注入高亮样式
+   * @private
+   */
+  _injectStyles() {
+    this.styleElement = document.createElement("style");
+    this.styleElement.id = "matcha-highlight-module";
+    this.styleElement.textContent = `
+  /* Matcha Highlight Module - 聚焦高亮效果 */
+  
+  /* 高亮容器包裹 */
+  .matcha-highlight {
+    display: inline;
+    position: relative;
+    transition: opacity var(--highlight-duration, ${this.options.duration}ms) var(--highlight-easing, ${this.options.easing});
+  }
+  
+  /* 聚焦模式下的幻灯片 */
+  .matcha-slide.highlight-focus-mode {
+    /* 使用 CSS 变量控制透明度 */
+    --dim-opacity: ${this.options.dimOpacity};
+  }
+  
+  /* 聚焦模式下，所有内容变暗 */
+  .matcha-slide.highlight-focus-mode .matcha-step-block,
+  .matcha-slide.highlight-focus-mode .matcha-col,
+  .matcha-slide.highlight-focus-mode .matcha-row,
+  .matcha-slide.highlight-focus-mode .matcha-grid-cell,
+  .matcha-slide.highlight-focus-mode > h1,
+  .matcha-slide.highlight-focus-mode > h2,
+  .matcha-slide.highlight-focus-mode > h3,
+  .matcha-slide.highlight-focus-mode > p,
+  .matcha-slide.highlight-focus-mode > ul,
+  .matcha-slide.highlight-focus-mode > blockquote,
+  .matcha-slide.highlight-focus-mode > pre,
+  .matcha-slide.highlight-focus-mode > table {
+    opacity: var(--dim-opacity);
+    transition: opacity var(--highlight-duration, ${this.options.duration}ms) var(--highlight-easing, ${this.options.easing});
+  }
+  
+  /* 高亮元素保持完全不透明 - 使用多层选择器确保覆盖 */
+  .matcha-slide.highlight-focus-mode .matcha-highlight.highlight-active {
+    opacity: 1 !important;
+    position: relative;
+    z-index: 10;
+  }
+  
+  /* 高亮元素的父容器也需要保持可见，但内部其他内容变暗 */
+  .matcha-slide.highlight-focus-mode .highlight-has-active {
+    opacity: 1 !important;
+  }
+  
+  /* 高亮元素的直接父级保持不透明，但其他兄弟元素变暗 */
+  .matcha-slide.highlight-focus-mode .highlight-has-active > *:not(.highlight-active):not(.highlight-has-active) {
+    opacity: var(--dim-opacity);
+  }
+  
+  /* 确保高亮元素本身内容完全可见 */
+  .matcha-highlight.highlight-active,
+  .matcha-highlight.highlight-active * {
+    opacity: 1 !important;
+  }
+  
+  /* 可选：给高亮内容添加微妙的发光效果 */
+  .matcha-slide.highlight-focus-mode .matcha-highlight.highlight-active {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+      `;
+    document.head.appendChild(this.styleElement);
+  }
+
+  /**
+   * 解析内容中的高亮标记
+   * @param {string} content - 原始内容
+   * @returns {string} 处理后的内容（高亮标记转换为 span）
+   */
+  parseHighlightMarkers(content) {
+    let highlightIndex = 0;
+    return content.replace(this.options.pattern, (match, text) => {
+      const result = `<span class="matcha-highlight" data-highlight-index="${highlightIndex}">${text}</span>`;
+      highlightIndex++;
+      return result;
+    });
+  }
+
+  /**
+   * 获取指定步骤块中的高亮元素
+   * @param {HTMLElement} stepBlock - 分步块元素
+   * @returns {NodeList} 高亮元素列表
+   */
+  getHighlightsInStep(stepBlock) {
+    return stepBlock.querySelectorAll(".matcha-highlight");
+  }
+
+  /**
+   * 统计内容中的高亮数量
+   * @param {string} content - 内容文本
+   * @returns {number} 高亮数量
+   */
+  countHighlights(content) {
+    const matches = content.match(this.options.pattern);
+    return matches ? matches.length : 0;
+  }
+
+  /**
+   * 激活指定的高亮元素
+   * @param {HTMLElement} slideElement - 幻灯片元素
+   * @param {HTMLElement} highlightElement - 要高亮的元素
+   */
+  activateHighlight(slideElement, highlightElement) {
+    // 开启聚焦模式
+    slideElement.classList.add("highlight-focus-mode");
+
+    // 清除之前的高亮
+    slideElement.querySelectorAll(".highlight-active").forEach((el) => {
+      el.classList.remove("highlight-active");
+    });
+
+    // 清除父级标记
+    slideElement.querySelectorAll(".highlight-has-active").forEach((el) => {
+      el.classList.remove("highlight-has-active");
+    });
+
+    // 激活当前高亮
+    highlightElement.classList.add("highlight-active");
+
+    // 标记所有祖先元素
+    let parent = highlightElement.parentElement;
+    while (parent && !parent.classList.contains("matcha-slide")) {
+      parent.classList.add("highlight-has-active");
+      parent = parent.parentElement;
+    }
+  }
+
+  /**
+   * 取消聚焦模式
+   * @param {HTMLElement} slideElement - 幻灯片元素
+   */
+  deactivateFocus(slideElement) {
+    slideElement.classList.remove("highlight-focus-mode");
+
+    slideElement.querySelectorAll(".highlight-active").forEach((el) => {
+      el.classList.remove("highlight-active");
+    });
+
+    slideElement.querySelectorAll(".highlight-has-active").forEach((el) => {
+      el.classList.remove("highlight-has-active");
+    });
+  }
+
+  /**
+   * 设置透明度
+   * @param {number} opacity - 非高亮区域的透明度 (0-1)
+   */
+  setDimOpacity(opacity) {
+    this.options.dimOpacity = opacity;
+    document.documentElement.style.setProperty("--dim-opacity", opacity);
+  }
+
+  /**
+   * 销毁模块
+   */
+  destroy() {
+    if (this.styleElement && this.styleElement.parentNode) {
+      this.styleElement.parentNode.removeChild(this.styleElement);
+    }
+    this.styleElement = null;
+    this.matcha = null;
+  }
+}
+
+// 导出方式
+export default Highlight;
+window.MatchaHighlight = Highlight;

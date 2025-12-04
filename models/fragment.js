@@ -1,19 +1,23 @@
 /**
  * @module fragment
- * @description 分步展示模块 - 内容累加显示，像 PowerPoint 一样
- * @version 2.2.0
+ * @description 分步展示模块 - 内容累加显示，支持高亮嵌套分步
+ * @version 3.0.0
  *
  * @syntax
  * 使用 <!-- step --> 分隔内容，每点击一次显示下一段
+ * 使用 ==内容== 标记高亮，同一步中的高亮按顺序逐个展示
+ *
+ * 显示流程示例：
+ *   第1步内容 → 第1步高亮1 → 第1步高亮2 → 第2步内容 → 第2步高亮1 → ...
  */
 class Fragment {
   constructor(options = {}) {
     this.options = {
       defaultEffect: "fade",
-      // 增加默认动画时长，让动画更流畅
       duration: 500,
-      // 使用更平滑的缓动函数
       easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+      // 高亮相关配置
+      highlightPattern: /==([^=]+)==/g,
       ...options,
     };
 
@@ -33,7 +37,6 @@ class Fragment {
     this.styleElement.textContent = `
 /* Matcha Fragment Module - 流畅的分步动画 */
 .matcha-step-block {
-  /* 更长的动画时间，更平滑的缓动 */
   transition: 
     opacity var(--step-duration, ${this.options.duration}ms) var(--step-easing, ${this.options.easing}),
     transform var(--step-duration, ${this.options.duration}ms) var(--step-easing, ${this.options.easing}),
@@ -125,30 +128,64 @@ class Fragment {
   }
 
   /**
+   * 解析高亮标记并转换为 span
+   * @private
+   */
+  _parseHighlights(content) {
+    let highlightIndex = 0;
+    return content.replace(this.options.highlightPattern, (match, text) => {
+      const result = `<span class="matcha-highlight" data-highlight-index="${highlightIndex}">${text}</span>`;
+      highlightIndex++;
+      return result;
+    });
+  }
+
+  /**
+   * 统计内容中的高亮数量
+   * @private
+   */
+  _countHighlights(content) {
+    const matches = content.match(this.options.highlightPattern);
+    return matches ? matches.length : 0;
+  }
+
+  /**
    * 解析内容中的分步标记并构建 HTML
    */
   parseAndRender(content, slideIndex, renderFn) {
-    const stepPattern = /<!--\s*step(?::\s*([\w-]+))?(?:\s*,\s*duration\s*=\s*(\d+))?\s*-->/g;
-    
+    const stepPattern =
+      /<!--\s*step(?::\s*([\w-]+))?(?:\s*,\s*duration\s*=\s*(\d+))?\s*-->/g;
+
     const steps = [];
     let match;
     let lastIndex = 0;
-    
+
     while ((match = stepPattern.exec(content)) !== null) {
       if (match.index > lastIndex) {
         const beforeContent = content.slice(lastIndex, match.index);
         if (beforeContent.trim()) {
           steps.push({
             content: beforeContent,
-            effect: steps.length === 0 ? "none" : (steps[steps.length - 1]?.nextEffect || this.options.defaultEffect),
-            duration: steps.length === 0 ? 0 : (steps[steps.length - 1]?.nextDuration || this.options.duration),
+            effect:
+              steps.length === 0
+                ? "none"
+                : steps[steps.length - 1]?.nextEffect ||
+                  this.options.defaultEffect,
+            duration:
+              steps.length === 0
+                ? 0
+                : steps[steps.length - 1]?.nextDuration ||
+                  this.options.duration,
           });
         }
       }
-      
+
       if (steps.length > 0) {
-        steps[steps.length - 1].nextEffect = match[1] || this.options.defaultEffect;
-        steps[steps.length - 1].nextDuration = match[2] ? parseInt(match[2]) : this.options.duration;
+        steps[steps.length - 1].nextEffect =
+          match[1] || this.options.defaultEffect;
+        steps[steps.length - 1].nextDuration = match[2]
+          ? parseInt(match[2])
+          : this.options.duration;
       } else {
         steps.push({
           content: "",
@@ -158,10 +195,10 @@ class Fragment {
           nextDuration: match[2] ? parseInt(match[2]) : this.options.duration,
         });
       }
-      
+
       lastIndex = match.index + match[0].length;
     }
-    
+
     if (lastIndex < content.length) {
       const remainingContent = content.slice(lastIndex);
       if (remainingContent.trim()) {
@@ -173,7 +210,7 @@ class Fragment {
         });
       }
     }
-    
+
     if (steps.length === 0) {
       steps.push({
         content: content,
@@ -181,34 +218,69 @@ class Fragment {
         duration: 0,
       });
     }
-    
-    const validSteps = steps.filter(step => step.content.trim());
-    
+
+    const validSteps = steps.filter((step) => step.content.trim());
+
+    // 计算每一步的高亮数量
+    const highlightsPerStep = validSteps.map((step) =>
+      this._countHighlights(step.content)
+    );
+
+    // 计算总的微步骤数（每步内容显示 + 该步的所有高亮）
+    let totalMicroSteps = 0;
+    validSteps.forEach((step, index) => {
+      totalMicroSteps += 1; // 步骤内容本身
+      totalMicroSteps += highlightsPerStep[index]; // 该步的高亮数量
+    });
+
     this.slideStates[slideIndex] = {
-      currentStep: 1,
+      currentStep: 1, // 当前显示的步骤块（1-based）
+      currentHighlight: 0, // 当前步骤内的高亮索引（0表示无高亮激活，1表示第一个高亮）
       totalSteps: validSteps.length,
+      highlightsPerStep: highlightsPerStep,
+      totalMicroSteps: totalMicroSteps,
+      currentMicroStep: 1, // 全局微步骤索引
     };
-    
+
     let html = "";
     validSteps.forEach((step, index) => {
       const stepNum = index + 1;
       const isFirst = index === 0;
       const visibleClass = isFirst ? "step-visible" : "step-hidden";
-      const renderedContent = renderFn(step.content);
+
+      // 先处理高亮标记，再渲染 Markdown
+      const contentWithHighlights = this._parseHighlights(step.content);
+      const renderedContent = renderFn(contentWithHighlights);
       const duration = step.duration || this.options.duration;
-      
-      html += `<div class="matcha-step-block ${visibleClass}" data-step="${stepNum}" data-effect="${step.effect}" style="--step-duration: ${duration}ms;">${renderedContent}</div>`;
+
+      html += `<div class="matcha-step-block ${visibleClass}" data-step="${stepNum}" data-effect="${step.effect}" data-highlights="${highlightsPerStep[index]}" style="--step-duration: ${duration}ms;">${renderedContent}</div>`;
     });
-    
+
     return html;
   }
 
   initSlide(slideElement, slideIndex) {
     const blocks = slideElement.querySelectorAll(".matcha-step-block");
-    const state = this.slideStates[slideIndex] || { currentStep: 1, totalSteps: blocks.length };
+    const state = this.slideStates[slideIndex] || {
+      currentStep: 1,
+      currentHighlight: 0,
+      totalSteps: blocks.length,
+      highlightsPerStep: [],
+      totalMicroSteps: blocks.length,
+      currentMicroStep: 1,
+    };
 
     state.blocks = Array.from(blocks);
     state.totalSteps = blocks.length;
+    state.slideElement = slideElement;
+
+    // 重新计算 highlightsPerStep
+    if (!state.highlightsPerStep || state.highlightsPerStep.length === 0) {
+      state.highlightsPerStep = state.blocks.map((block) => {
+        return block.querySelectorAll(".matcha-highlight").length;
+      });
+    }
+
     this.slideStates[slideIndex] = state;
 
     blocks.forEach((block, i) => {
@@ -227,6 +299,11 @@ class Fragment {
     if (!state || !state.blocks) return;
 
     state.currentStep = 1;
+    state.currentHighlight = 0;
+    state.currentMicroStep = 1;
+
+    // 清除高亮状态
+    this._clearHighlightFocus(state.slideElement);
 
     state.blocks.forEach((block, i) => {
       block.classList.remove("step-entering");
@@ -245,6 +322,11 @@ class Fragment {
     if (!state || !state.blocks) return;
 
     state.currentStep = state.totalSteps;
+    state.currentHighlight = 0;
+    state.currentMicroStep = state.totalMicroSteps;
+
+    // 清除高亮状态
+    this._clearHighlightFocus(state.slideElement);
 
     state.blocks.forEach((block) => {
       block.classList.remove("step-hidden", "step-entering");
@@ -252,24 +334,49 @@ class Fragment {
     });
   }
 
+  /**
+   * 下一步 - 处理分步和高亮的嵌套逻辑
+   */
   nextStep(slideIndex) {
     const state = this.slideStates[slideIndex];
     if (!state || !state.blocks) return false;
 
+    const currentBlock = state.blocks[state.currentStep - 1];
+    const highlightsInCurrentStep =
+      state.highlightsPerStep[state.currentStep - 1] || 0;
+
+    // 情况1：当前步骤还有未显示的高亮
+    if (state.currentHighlight < highlightsInCurrentStep) {
+      state.currentHighlight++;
+      state.currentMicroStep++;
+
+      // 激活第 currentHighlight 个高亮（索引为 currentHighlight - 1）
+      const highlights = currentBlock.querySelectorAll(".matcha-highlight");
+      if (highlights[state.currentHighlight - 1]) {
+        this._activateHighlight(
+          state.slideElement,
+          highlights[state.currentHighlight - 1]
+        );
+      }
+
+      return true;
+    }
+
+    // 情况2：当前步骤的高亮已全部显示，尝试进入下一步
     if (state.currentStep >= state.totalSteps) {
+      // 已是最后一步且高亮已完成
       return false;
     }
 
+    // 清除高亮状态，进入下一步
+    this._clearHighlightFocus(state.slideElement);
+
     const nextBlock = state.blocks[state.currentStep];
     if (nextBlock) {
-      // 先移除 hidden，添加 entering（设置初始动画状态）
       nextBlock.classList.remove("step-hidden");
       nextBlock.classList.add("step-entering");
 
-      // 用 requestAnimationFrame 确保浏览器渲染了初始状态
-      // 然后触发过渡动画
       requestAnimationFrame(() => {
-        // 强制重排
         nextBlock.offsetHeight;
         requestAnimationFrame(() => {
           nextBlock.classList.remove("step-entering");
@@ -278,15 +385,42 @@ class Fragment {
       });
 
       state.currentStep++;
+      state.currentHighlight = 0;
+      state.currentMicroStep++;
     }
 
-    return state.currentStep < state.totalSteps;
+    return this.hasNextStep(slideIndex);
   }
 
+  /**
+   * 上一步 - 处理分步和高亮的嵌套逻辑
+   */
   prevStep(slideIndex) {
     const state = this.slideStates[slideIndex];
     if (!state || !state.blocks) return false;
 
+    // 情况1：当前步骤有激活的高亮，先取消高亮
+    if (state.currentHighlight > 0) {
+      state.currentHighlight--;
+      state.currentMicroStep--;
+
+      if (state.currentHighlight > 0) {
+        // 还有高亮，激活前一个
+        const currentBlock = state.blocks[state.currentStep - 1];
+        const highlights = currentBlock.querySelectorAll(".matcha-highlight");
+        this._activateHighlight(
+          state.slideElement,
+          highlights[state.currentHighlight - 1]
+        );
+      } else {
+        // 没有高亮了，清除聚焦模式
+        this._clearHighlightFocus(state.slideElement);
+      }
+
+      return true;
+    }
+
+    // 情况2：当前步骤没有激活的高亮，回到上一步
     if (state.currentStep <= 1) {
       return false;
     }
@@ -296,30 +430,116 @@ class Fragment {
       currentBlock.classList.remove("step-visible");
       currentBlock.classList.add("step-hidden");
       state.currentStep--;
+      state.currentMicroStep--;
+
+      // 检查上一步是否有高亮，如果有则激活最后一个
+      const prevHighlights =
+        state.highlightsPerStep[state.currentStep - 1] || 0;
+      if (prevHighlights > 0) {
+        state.currentHighlight = prevHighlights;
+        const prevBlock = state.blocks[state.currentStep - 1];
+        const highlights = prevBlock.querySelectorAll(".matcha-highlight");
+        this._activateHighlight(
+          state.slideElement,
+          highlights[state.currentHighlight - 1]
+        );
+      }
     }
 
-    return state.currentStep > 1;
+    return this.hasPrevStep(slideIndex);
+  }
+
+  /**
+   * 激活高亮元素
+   * @private
+   */
+  _activateHighlight(slideElement, highlightElement) {
+    // 开启聚焦模式
+    slideElement.classList.add("highlight-focus-mode");
+
+    // 清除之前的高亮
+    slideElement.querySelectorAll(".highlight-active").forEach((el) => {
+      el.classList.remove("highlight-active");
+    });
+
+    // 清除父级标记
+    slideElement.querySelectorAll(".highlight-has-active").forEach((el) => {
+      el.classList.remove("highlight-has-active");
+    });
+
+    // 激活当前高亮
+    highlightElement.classList.add("highlight-active");
+
+    // 标记所有祖先元素
+    let parent = highlightElement.parentElement;
+    while (parent && !parent.classList.contains("matcha-slide")) {
+      parent.classList.add("highlight-has-active");
+      parent = parent.parentElement;
+    }
+  }
+
+  /**
+   * 清除高亮聚焦状态
+   * @private
+   */
+  _clearHighlightFocus(slideElement) {
+    if (!slideElement) return;
+
+    slideElement.classList.remove("highlight-focus-mode");
+
+    slideElement.querySelectorAll(".highlight-active").forEach((el) => {
+      el.classList.remove("highlight-active");
+    });
+
+    slideElement.querySelectorAll(".highlight-has-active").forEach((el) => {
+      el.classList.remove("highlight-has-active");
+    });
   }
 
   hasSteps(slideIndex) {
     const state = this.slideStates[slideIndex];
-    return state && state.totalSteps > 1;
+    return state && state.totalMicroSteps > 1;
   }
 
   hasNextStep(slideIndex) {
     const state = this.slideStates[slideIndex];
-    return state && state.currentStep < state.totalSteps;
+    if (!state) return false;
+
+    const highlightsInCurrentStep =
+      state.highlightsPerStep[state.currentStep - 1] || 0;
+
+    // 检查当前步骤是否还有未显示的高亮
+    if (state.currentHighlight < highlightsInCurrentStep) {
+      return true;
+    }
+
+    // 检查是否还有下一步
+    return state.currentStep < state.totalSteps;
   }
 
   hasPrevStep(slideIndex) {
     const state = this.slideStates[slideIndex];
-    return state && state.currentStep > 1;
+    if (!state) return false;
+
+    // 有激活的高亮
+    if (state.currentHighlight > 0) {
+      return true;
+    }
+
+    // 不在第一步
+    return state.currentStep > 1;
   }
 
   getStepState(slideIndex) {
     const state = this.slideStates[slideIndex];
-    if (!state) return { current: 1, total: 1 };
-    return { current: state.currentStep, total: state.totalSteps };
+    if (!state) return { current: 1, total: 1, highlight: 0 };
+    return {
+      current: state.currentStep,
+      total: state.totalSteps,
+      highlight: state.currentHighlight,
+      microStep: state.currentMicroStep,
+      totalMicroSteps: state.totalMicroSteps,
+    };
   }
 
   destroy() {

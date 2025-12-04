@@ -1,4 +1,4 @@
-/* matcha.css - V2 Art & Layout Update */
+/* matcha.css - V3 Highlight Focus Update */
 :root {
   --matcha-bg: #121212;
   --matcha-fg: #e0e0e0;
@@ -246,4 +246,69 @@ hr {
   width: 0%;
   transition: width 0.3s;
   z-index: 100;
+}
+
+/* === 高亮聚焦模块 === */
+
+/* 高亮标记元素 */
+.matcha-highlight {
+  display: inline;
+  position: relative;
+  transition: opacity 0.4s ease, text-shadow 0.4s ease;
+}
+
+/* 聚焦模式变量 */
+.matcha-slide.highlight-focus-mode {
+  --dim-opacity: 0.2;
+  --highlight-duration: 400ms;
+  --highlight-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 聚焦模式下内容变暗 */
+.matcha-slide.highlight-focus-mode .matcha-step-block,
+.matcha-slide.highlight-focus-mode .matcha-col,
+.matcha-slide.highlight-focus-mode .matcha-row,
+.matcha-slide.highlight-focus-mode .matcha-grid-cell,
+.matcha-slide.highlight-focus-mode > h1,
+.matcha-slide.highlight-focus-mode > h2,
+.matcha-slide.highlight-focus-mode > h3,
+.matcha-slide.highlight-focus-mode > p,
+.matcha-slide.highlight-focus-mode > ul,
+.matcha-slide.highlight-focus-mode > blockquote,
+.matcha-slide.highlight-focus-mode > pre,
+.matcha-slide.highlight-focus-mode > table {
+  opacity: var(--dim-opacity);
+  transition: opacity var(--highlight-duration) var(--highlight-easing);
+}
+
+/* 包含高亮的祖先保持不透明 */
+.matcha-slide.highlight-focus-mode .highlight-has-active {
+  opacity: 1 !important;
+}
+
+/* 高亮元素的兄弟变暗 */
+.matcha-slide.highlight-focus-mode
+  .highlight-has-active
+  > *:not(.highlight-active):not(.highlight-has-active) {
+  opacity: var(--dim-opacity);
+  transition: opacity var(--highlight-duration) var(--highlight-easing);
+}
+
+/* 高亮元素保持完全不透明 */
+.matcha-slide.highlight-focus-mode .matcha-highlight.highlight-active {
+  opacity: 1 !important;
+  position: relative;
+  z-index: 10;
+}
+
+/* 高亮元素内容完全可见 */
+.matcha-highlight.highlight-active,
+.matcha-highlight.highlight-active * {
+  opacity: 1 !important;
+}
+
+/* 高亮发光效果 */
+.matcha-slide.highlight-focus-mode .matcha-highlight.highlight-active {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3),
+    0 0 40px rgba(var(--matcha-accent), 0.2);
 }

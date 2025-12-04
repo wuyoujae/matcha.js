@@ -11,6 +11,7 @@
 - [样式模块 (style)](#样式模块-style)
 - [过渡动画 (transition)](#过渡动画-transition)
 - [分步展示 (fragment)](#分步展示-fragment)
+- [高亮聚焦 (highlight)](#高亮聚焦-highlight)
 - [Markdown 解析 (markdowmParse)](#markdown-解析-markdowmparse)
 - [进度条 (progressBar)](#进度条-progressbar)
 
@@ -298,6 +299,34 @@ matcha.modules.transition.registerTransition("myEffect", {
 - 第 2 步: "你好 这是第一步..." + "这是第二步..."（累加）
 - 第 3 步: 继续累加第三段
 
+### 高亮嵌套分步
+
+使用 `==内容==` 标记高亮内容，同一步中的多个高亮会按顺序逐个展示：
+
+```markdown
+你好，这里是==Matcha==
+
+<!-- step -->
+
+我叫==jae==，我是一名==全栈==独立==开发者==
+```
+
+**显示流程**：
+
+```
+1. "你好，这里是Matcha"（普通显示）
+2. "你好，这里是Matcha"（Matcha 高亮，其他内容变暗）
+3. "你好，这里是Matcha，我叫jae，..."（第二步内容显示）
+4. "..."（jae 高亮）
+5. "..."（全栈 高亮）
+6. "..."（开发者 高亮）
+7. 下一页
+```
+
+> 💡 **高亮原理**：降低整个画面透明度，高亮内容保持原透明度，通过衬托产生聚焦效果。
+
+> 💡 **高亮完成后**：直接进入下一步/下一页，不需要恢复到非高亮状态。
+
 ### 带过渡效果
 
 | 效果        | 语法                         | 说明         |
@@ -364,6 +393,93 @@ matcha.modules.fragment.hasNextStep(slideIndex);
 // 获取分步状态
 matcha.modules.fragment.getStepState(slideIndex);
 // { current: 2, total: 4 }
+```
+
+---
+
+## 高亮聚焦 (highlight)
+
+> 文件：`models/highlight.js`
+
+高亮模块与分步系统深度集成，实现**嵌套分步**效果。同一步中的多个高亮会按顺序逐个展示。
+
+### 基础语法
+
+使用双等号 `==内容==` 包围需要高亮的内容：
+
+```markdown
+你好，这里是==Matcha==
+```
+
+### 多高亮嵌套
+
+同一步中的多个高亮会形成嵌套分步：
+
+```markdown
+我叫==jae==，我是一名==全栈==独立==开发者==
+```
+
+**显示流程**：
+
+| 步骤 | 显示内容                         | 高亮元素 |
+| ---- | -------------------------------- | -------- |
+| 1    | 我叫 jae，我是一名全栈独立开发者 | 无       |
+| 2    | (整体变暗)                       | jae      |
+| 3    | (整体变暗)                       | 全栈     |
+| 4    | (整体变暗)                       | 开发者   |
+| 5    | 下一步/下一页                    | -        |
+
+### 高亮效果原理
+
+高亮通过**透明度衬托**实现：
+
+1. 开启聚焦模式时，整个幻灯片内容透明度降低
+2. 被高亮的元素保持原透明度
+3. 形成视觉聚焦效果，无需添加边框或背景色
+
+### 与分步结合
+
+```markdown
+# 标题
+
+这是第一步，包含==高亮内容==
+
+<!-- step -->
+
+第二步有多个高亮：==重点 1==和==重点 2==
+```
+
+**完整显示流程**：
+
+```
+1. 标题 + 第一步内容
+2. (高亮内容 高亮)
+3. 标题 + 第一步 + 第二步内容
+4. (重点1 高亮)
+5. (重点2 高亮)
+6. 下一页
+```
+
+### JavaScript 配置
+
+```javascript
+new Matcha({
+  highlight: {
+    dimOpacity: 0.2, // 非高亮区域透明度 (0-1)
+    duration: 400, // 动画时长(ms)
+  },
+});
+```
+
+### 运行时控制
+
+```javascript
+// 设置透明度
+matcha.modules.highlight.setDimOpacity(0.15);
+
+// 获取分步状态（包含高亮信息）
+matcha.modules.fragment.getStepState(slideIndex);
+// { current: 2, total: 3, highlight: 1, microStep: 4, totalMicroSteps: 8 }
 ```
 
 ---

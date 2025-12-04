@@ -1,10 +1,11 @@
-/* matcha.js - V6 Per-slide Config & Fragment Support */
+/* matcha.js - V7 Per-slide Config & Fragment Support with Highlight */
 import MarkdowmParse from "./models/markdowmParse.js";
 import ProgressBar from "./models/progressBar.js";
 import Style from "./models/style.js";
 import Layout from "./models/layout.js";
 import Transition from "./models/transition.js";
 import Fragment from "./models/fragment.js";
+import Highlight from "./models/highlight.js";
 
 class Matcha {
   constructor(config = {}) {
@@ -17,6 +18,7 @@ class Matcha {
       layout: config.layout || {},
       transition: config.transition || {},
       fragment: config.fragment || {},
+      highlight: config.highlight || {},
     };
     this.slidesElements = [];
     this.currentSlideIndex = 0;
@@ -33,6 +35,7 @@ class Matcha {
     this.modules.layout = new Layout(this.config.layout);
     this.modules.transition = new Transition(this.config.transition);
     this.modules.fragment = new Fragment(this.config.fragment);
+    this.modules.highlight = new Highlight(this.config.highlight);
   }
 
   use(module, options = {}) {
@@ -56,6 +59,7 @@ class Matcha {
     this.modules.layout.init(this);
     this.modules.transition.init(this);
     this.modules.fragment.init(this);
+    this.modules.highlight.init(this);
 
     const rawMarkdown = scriptTag.textContent;
     this.parseAndBuild(rawMarkdown);

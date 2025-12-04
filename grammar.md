@@ -301,22 +301,22 @@ matcha.modules.transition.registerTransition("myEffect", {
 
 ### 高亮嵌套分步
 
-使用 `==内容==` 标记高亮内容，同一步中的多个高亮会按顺序逐个展示：
+使用 `<内容>` 标记高亮内容，同一步中的多个高亮会按顺序逐个展示：
 
 ```markdown
-你好，这里是==Matcha==
+你好，这里是<Matcha>
 
 <!-- step -->
 
-我叫==jae==，我是一名==全栈==独立==开发者==
+我叫<jae>，我是一名<全栈>独立<开发者>
 ```
 
 **显示流程**：
 
 ```
-1. "你好，这里是Matcha"（普通显示）
-2. "你好，这里是Matcha"（Matcha 高亮，其他内容变暗）
-3. "你好，这里是Matcha，我叫jae，..."（第二步内容显示）
+1. "你好，这里是 Matcha"（普通显示）
+2. "你好，这里是 Matcha"（Matcha 高亮，其他内容变暗）
+3. "你好，这里是 Matcha，我叫 jae，..."（第二步内容显示）
 4. "..."（jae 高亮）
 5. "..."（全栈 高亮）
 6. "..."（开发者 高亮）
@@ -405,10 +405,10 @@ matcha.modules.fragment.getStepState(slideIndex);
 
 ### 基础语法
 
-使用双等号 `==内容==` 包围需要高亮的内容：
+使用尖括号 `<内容>` 包围需要高亮的内容：
 
 ```markdown
-你好，这里是==Matcha==
+你好，这里是<Matcha>
 ```
 
 ### 多高亮嵌套
@@ -416,7 +416,7 @@ matcha.modules.fragment.getStepState(slideIndex);
 同一步中的多个高亮会形成嵌套分步：
 
 ```markdown
-我叫==jae==，我是一名==全栈==独立==开发者==
+我叫<jae>，我是一名<全栈>独立<开发者>
 ```
 
 **显示流程**：
@@ -442,11 +442,11 @@ matcha.modules.fragment.getStepState(slideIndex);
 ```markdown
 # 标题
 
-这是第一步，包含==高亮内容==
+这是第一步，包含<高亮内容>
 
 <!-- step -->
 
-第二步有多个高亮：==重点 1==和==重点 2==
+第二步有多个高亮：<重点 1>和<重点 2>
 ```
 
 **完整显示流程**：
@@ -455,8 +455,8 @@ matcha.modules.fragment.getStepState(slideIndex);
 1. 标题 + 第一步内容
 2. (高亮内容 高亮)
 3. 标题 + 第一步 + 第二步内容
-4. (重点1 高亮)
-5. (重点2 高亮)
+4. (重点 1 高亮)
+5. (重点 2 高亮)
 6. 下一页
 ```
 

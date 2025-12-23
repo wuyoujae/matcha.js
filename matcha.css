@@ -1,0 +1,324 @@
+/* matcha.css - Clean Tech (v5.1 - Fix Quote Style) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  /* --- 核心配色 --- */
+  --bg-deep: #050505;
+  --fg-primary: #ffffff;
+  --fg-secondary: rgba(255, 255, 255, 0.65);
+  --fg-tertiary: rgba(255, 255, 255, 0.4);
+
+  /* 强调色：薄荷绿 */
+  /* 允许 Style 模块通过 --matcha-accent 覆盖全局强调色 */
+  --accent-color: var(--matcha-accent, #00e676);
+  --accent-dim: rgba(0, 230, 118, 0.1);
+
+  /* 边框 */
+  --border-weak: rgba(255, 255, 255, 0.1);
+  --border-active: rgba(255, 255, 255, 0.3);
+
+  /* --- 流体排版系统 --- */
+  --h1-size: clamp(40px, 8vmin, 110px);
+  --h2-size: clamp(28px, 5vmin, 72px);
+  --h3-size: clamp(20px, 3.5vmin, 56px);
+  --body-size: clamp(16px, 2.5vmin, 38px);
+  --code-size: clamp(14px, 2.2vmin, 30px);
+
+  /* --- 间距系统 --- */
+  --space-md: 4vmin;
+  --slide-padding: 8vmin 10vmin;
+
+  /* --- 字体 --- */
+  --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono: "JetBrains Mono", Menlo, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-deep);
+  color: var(--fg-primary);
+  font-family: var(--font-main);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+
+  /* === 背景：保持你喜欢的极客网格 + 聚光灯 === */
+  background-image: radial-gradient(
+      circle at 50% 0%,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 60%
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+
+  background-size: 100% 100%, 60px 60px, 60px 60px;
+  background-position: center top, center center, center center;
+}
+
+#matcha-stage {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  perspective: 2000px;
+}
+
+/* --- 幻灯片单页 --- */
+.matcha-slide {
+  position: absolute;
+  inset: 0;
+  padding: var(--slide-padding);
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  /* === 关键：支持按页主题（Style 模块写入的 --slide-*）=== */
+  background-color: var(--slide-bg, transparent);
+  color: var(--slide-fg, var(--fg-primary));
+  /* 把 “按页强调色” 映射成现有 CSS 使用的变量，让 h2 下划线、列表 bullet 等自动跟随 */
+  --accent-color: var(--slide-accent, var(--accent-color));
+  /* 让卡片/边框跟随按页主题 */
+  --border-weak: var(--slide-border-color, var(--border-weak));
+
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.98) translateY(20px);
+}
+
+.matcha-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
+  z-index: 10;
+}
+
+.matcha-slide.past {
+  opacity: 0;
+  transform: translateY(-40px);
+}
+
+/* --- 排版样式 --- */
+.matcha-slide h1 {
+  font-size: var(--h1-size);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5em 0;
+  color: var(--slide-h1, #fff);
+  /* 保留原来的“金属质感”渐变，但起始色跟随主题 */
+  background: linear-gradient(
+    180deg,
+    var(--slide-h1, #fff) 20%,
+    rgba(255, 255, 255, 0.7) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.matcha-slide h2 {
+  font-size: var(--h2-size);
+  font-weight: 600;
+  color: var(--slide-h2, var(--slide-fg, var(--fg-primary)));
+  margin: 0.5em 0 0.8em;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid var(--accent-color);
+  padding-bottom: 0.2em;
+  width: fit-content;
+}
+
+.matcha-slide h3 {
+  font-size: var(--h3-size);
+  color: var(--accent-color);
+  font-weight: 500;
+  margin: 1.5em 0 0.6em;
+}
+
+.matcha-slide p,
+.matcha-slide li {
+  font-size: var(--body-size);
+  line-height: 1.6;
+  /* 主题的 note 色更适合作为正文灰度；没有则回退到全局 */
+  color: var(--slide-note, var(--fg-secondary));
+  margin-bottom: 0.8em;
+  max-width: 70ch;
+}
+
+.matcha-slide strong {
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+/* --- 列表优化（ul/ol 统一规范）--- */
+.matcha-slide ul,
+.matcha-slide ol {
+  padding: 0;
+  margin: 1.2em 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5vmin;
+}
+
+.matcha-slide ul li,
+.matcha-slide ol li {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+/* 无序列表：方点 bullet（更“科技感”） */
+.matcha-slide ul li::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color);
+  transform: translateY(-2px);
+  flex-shrink: 0;
+}
+
+/* 有序列表：计数器编号（支持数字/字母/中文数字风格） */
+.matcha-slide ol {
+  counter-reset: matcha-ol;
+}
+
+.matcha-slide ol li {
+  counter-increment: matcha-ol;
+}
+
+.matcha-slide ol li::before {
+  content: counter(matcha-ol) ".";
+  font-family: var(--font-mono);
+  color: var(--accent-color);
+  font-weight: 700;
+  opacity: 0.9;
+  min-width: 2.4ch;
+  text-align: right;
+  transform: translateY(-1px);
+  flex-shrink: 0;
+}
+
+/* 字母序号 */
+.matcha-slide ol.matcha-ol-alpha li::before {
+  content: counter(matcha-ol, lower-alpha) ".";
+}
+.matcha-slide ol.matcha-ol-alpha-upper li::before {
+  content: counter(matcha-ol, upper-alpha) ".";
+}
+
+/* 中文数字序号（“一二三四”） */
+.matcha-slide ol.matcha-ol-cjk li::before {
+  content: counter(matcha-ol, cjk-ideographic) "、";
+  min-width: 2.8ch;
+}
+
+/* --- 卡片：清透的玻璃态 --- */
+.matcha-card {
+  background: var(--slide-card-bg, rgba(255, 255, 255, 0.03));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-weak);
+  border-radius: 16px;
+  padding: var(--space-md);
+  margin: 2vmin 0;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* --- 代码块 --- */
+pre {
+  background: #0d0d0d;
+  border: 1px solid var(--border-weak);
+  border-radius: 12px;
+  padding: 50px 32px 32px;
+  margin: 2vmin 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+pre::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff5f56;
+  box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+  color: #a5d6ff;
+  line-height: 1.5;
+}
+
+p code,
+li code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- 引用 (已回退到 Designer's Cut 风格) --- */
+/* 这里去掉了 v5.0 的背景块和线条，改回了大引号设计 */
+.matcha-slide blockquote {
+  border: none; /* 去除线条 */
+  background: transparent; /* 去除背景色，防止在卡片内重叠 */
+  position: relative;
+  margin: 3vmin 0;
+  padding: 0 0 0 50px; /* 左侧留白给引号 */
+  font-size: calc(var(--body-size) * 1.2); /* 字号加大 */
+  font-style: italic;
+  color: var(--slide-fg, var(--fg-primary)); /* 跟随按页文字色 */
+  opacity: 0.95;
+}
+
+/* 添加巨大的装饰引号 */
+.matcha-slide blockquote::before {
+  content: "“";
+  position: absolute;
+  left: 0;
+  top: -10px; /* 微调位置 */
+  font-size: 80px;
+  line-height: 1;
+  font-family: serif; /* 衬线体 */
+  color: var(--accent-color);
+  opacity: 0.5;
+}
+
+/* --- 图片 --- */
+img {
+  border-radius: 12px;
+  border: 1px solid var(--border-weak);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+/* --- 进度条 --- */
+#matcha-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color);
+  z-index: 100;
+}

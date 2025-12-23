@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matcha.js 演示</title>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="./matcha.css" />
+    <!-- 引入latex -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+    />
+    <style>
+      /* 简单的字体设置，非框架必须 */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 1. 容器 -->
+    <div id="matcha-stage"></div>
+
+    <!-- 2. Markdown 源码 -->
+    <script id="matcha-source" type="text/plain">
+      <!-- 内容将从本地 cc.md 加载 -->
+    </script>
+
+    <!-- 3. 启动脚本 -->
+    <script type="module">
+      import Matcha from "./matcha.js";
+
+      (async () => {
+        const sourceEl = document.getElementById("matcha-source");
+        try {
+          const res = await fetch("./cc.md");
+          if (!res.ok) throw new Error(`加载 cc.md 失败：${res.status}`);
+          const md = await res.text();
+          sourceEl.textContent = md;
+
+          new Matcha({
+            progressBar: {
+              visible: true,
+              color: "#6aa84f",
+              position: "top",
+            },
+          }).start();
+        } catch (err) {
+          console.error(err);
+          sourceEl.textContent = `无法加载本地 Markdown：${err.message}`;
+        }
+      })();
+    </script>
+  </body>
+</html>
